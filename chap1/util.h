@@ -1,6 +1,7 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
+#include <stdbool.h>
 #include <assert.h>
 
 typedef char *string;
@@ -9,7 +10,12 @@ typedef char *string;
 #define FALSE 0
 
 void *checked_malloc(int);
+
+/* create a string in heap from a null terminated string */
 string String(char *);
+
+/* create a string in heap from a char array with length */
+string NString(char *, size_t len);
 
 typedef struct U_boolList_ *U_boolList;
 struct U_boolList_ {bool head; U_boolList tail;};
