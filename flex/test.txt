@@ -1,7 +1,0 @@
-123 name 3.14 .45
-{ This is a single line comment in pascal }
-
-3 + 0.123
-
-function() a = 3.14
-a1 b2

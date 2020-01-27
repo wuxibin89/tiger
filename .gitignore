@@ -3,4 +3,5 @@ a.out
 *.log
 lex.yy.c
 lextest
-flex/
+_*/
+.vscode/

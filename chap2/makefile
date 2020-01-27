@@ -10,8 +10,8 @@ errormsg.o: errormsg.c errormsg.h util.h
 lex.yy.o: lex.yy.c tokens.h errormsg.h util.h
 	cc -g -c lex.yy.c
 
-lex.yy.c: tiger.lex
-	flex tiger.lex
+lex.yy.c: tiger.l
+	flex tiger.l
 
 util.o: util.c util.h
 	cc -g -c util.c
