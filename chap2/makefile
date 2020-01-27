@@ -11,10 +11,34 @@ lex.yy.o: lex.yy.c tokens.h errormsg.h util.h
 	cc -g -c lex.yy.c
 
 lex.yy.c: tiger.lex
-	lex tiger.lex
+	flex tiger.lex
 
 util.o: util.c util.h
 	cc -g -c util.c
 
+test:
+	@for num in {1..49}; do \
+		fname="../testcases/test$$num.tig"; \
+		echo "lexical analyze $$fname ... \c"; \
+		./lextest $$fname > test.log 2>&1; \
+		if [[ $$(echo $$?) != 0 ]]; then \
+			echo "fail"; \
+			break; \
+		else \
+			echo "success"; \
+		fi \
+	done
+	@for file in merge.tig queens.tig; do \
+		fname="../testcases/$$file"; \
+		echo "lexical analyze $$fname ... \c"; \
+		./lextest $$fname > test.log 2>&1; \
+		if [[ $$(echo $$?) != 0 ]]; then \
+			echo "fail"; \
+			break; \
+		else \
+			echo "success"; \
+		fi \
+	done
+
 clean: 
-	rm -f a.out util.o driver.o lex.yy.o lex.yy.c errormsg.o
+	rm -f a.out util.o driver.o lex.yy.o lex.yy.c errormsg.o lextest
