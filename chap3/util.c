@@ -16,9 +16,17 @@ void *checked_malloc(int len)
 }
 
 string String(char *s)
-{string p = (string)checked_malloc(strlen(s)+1);
+{
+ string p = (string)checked_malloc(strlen(s)+1);
  strcpy(p,s);
  return p;
+}
+
+string NString(char *s, size_t len) {
+   string p = (string)checked_malloc(len + 1);
+   memcpy(p, s, len);
+   p[len] = '\0';
+   return p;
 }
 
 U_boolList U_BoolList(bool head, U_boolList tail)
