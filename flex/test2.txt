@@ -1,0 +1,6 @@
+expect-floats 123.456    3.14  /* comment */
+abc
+"hello \t nice \45 \nworld" /**** This is a
+multiple line
+comment ****/
+.123
