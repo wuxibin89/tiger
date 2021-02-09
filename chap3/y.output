@@ -1,2458 +1,2558 @@
-State 8 conflicts: 1 shift/reduce
-State 45 conflicts: 1 shift/reduce
-State 101 conflicts: 2 shift/reduce
-State 102 conflicts: 1 shift/reduce
-State 132 conflicts: 1 shift/reduce
-State 155 conflicts: 1 shift/reduce
+   0  $accept : program $end
 
+   1  program : statement
 
-Grammar
+   2  primary_expression : NIL
+   3                     | INT
+   4                     | STRING
+   5                     | LPAREN expression RPAREN
+   6                     | ID LBRACE type_fields_initializer RBRACE
 
-    0 $accept: program $end
+   7  type_fields_initializer :
+   8                          | type_fields_initializer_list
 
-    1 program: /* empty */
-    2        | statement
+   9  type_fields_initializer_list : ID EQ expression
+  10                               | type_fields_initializer_list COMMA ID EQ expression
 
-    3 primary_expression: ID
-    4                   | NIL
-    5                   | INT
-    6                   | STRING
-    7                   | LPAREN RPAREN
-    8                   | LPAREN expression RPAREN
+  11  postfix_expression : primary_expression
+  12                     | ID
+  13                     | ID LBRACK expression RBRACK
+  14                     | postfix_expression LBRACK expression RBRACK
+  15                     | postfix_expression LPAREN RPAREN
+  16                     | postfix_expression LPAREN argument_expression_list RPAREN
+  17                     | postfix_expression DOT ID
 
-    9 array_expression: ID LBRACK expression RBRACK
+  18  argument_expression_list : statement
+  19                           | argument_expression_list COMMA statement
 
-   10 postfix_expression: primary_expression
-   11                   | array_expression
-   12                   | postfix_expression DOT ID
-   13                   | postfix_expression LBRACK expression RBRACK
-   14                   | postfix_expression LPAREN RPAREN
-   15                   | postfix_expression LPAREN argument_list RPAREN
+  20  unary_expression : postfix_expression
+  21                   | MINUS unary_expression
 
-   16 argument_list: expression
-   17              | argument_list COMMA expression
+  22  multiplicative_expression : unary_expression
+  23                            | multiplicative_expression TIMES unary_expression
+  24                            | multiplicative_expression DIVIDE unary_expression
 
-   18 unary_expression: postfix_expression
-   19                 | MINUS unary_expression
+  25  additive_expression : multiplicative_expression
+  26                      | additive_expression PLUS multiplicative_expression
+  27                      | additive_expression MINUS multiplicative_expression
 
-   20 multiplicative_expression: unary_expression
-   21                          | multiplicative_expression TIMES unary_expression
-   22                          | multiplicative_expression DIVIDE unary_expression
+  28  relational_expression : additive_expression
+  29                        | relational_expression LT additive_expression
+  30                        | relational_expression GT additive_expression
+  31                        | relational_expression LE additive_expression
+  32                        | relational_expression GE additive_expression
 
-   23 additive_expression: multiplicative_expression
-   24                    | additive_expression PLUS multiplicative_expression
-   25                    | additive_expression MINUS multiplicative_expression
+  33  equality_expression : relational_expression
+  34                      | equality_expression EQ relational_expression
+  35                      | equality_expression NEQ relational_expression
 
-   26 equality_expression: additive_expression
-   27                    | equality_expression EQ additive_expression
-   28                    | equality_expression NEQ additive_expression
+  36  logical_and_expression : equality_expression
+  37                         | logical_and_expression AND equality_expression
 
-   29 relational_expression: equality_expression
-   30                      | relational_expression LT equality_expression
-   31                      | relational_expression GT equality_expression
-   32                      | relational_expression LE equality_expression
-   33                      | relational_expression GE equality_expression
+  38  logical_or_expression : logical_and_expression
+  39                        | logical_or_expression OR logical_and_expression
 
-   34 AND_expression: relational_expression
-   35               | AND_expression AND relational_expression
+  40  assignment_expression : logical_or_expression
+  41                        | unary_expression ASSIGN assignment_expression
 
-   36 inclusive_OR_expression: AND_expression
-   37                        | inclusive_OR_expression OR AND_expression
+  42  expression : assignment_expression
+  43             | ID LBRACK expression RBRACK OF expression
+  44             | compound_statement
 
-   38 array_creation: array_expression OF value_expression
+  45  declaration :
+  46              | init_declarator_list
 
-   39 struct_creation: ID LBRACE RBRACE
-   40                | ID LBRACE field_list RBRACE
+  47  init_declarator_list : init_declarator
+  48                       | init_declarator_list init_declarator
 
-   41 field_list: ID EQ expression
-   42           | field_list COMMA ID EQ expression
+  49  init_declarator : type_declarator
+  50                  | var_declarator
+  51                  | function_declarator
 
-   43 value_expression: inclusive_OR_expression
-   44                 | array_creation
-   45                 | struct_creation
+  52  type_declarator : TYPE ID EQ type_definition
 
-   46 assignment_expression: value_expression
-   47                      | unary_expression ASSIGN value_expression
+  53  type_definition : ID
+  54                  | LBRACE type_fields RBRACE
+  55                  | ARRAY OF ID
 
-   48 expression: statement
-   49           | assignment_expression
-   50           | expression SEMICOLON statement
-   51           | expression SEMICOLON assignment_expression
+  56  type_fields :
+  57              | init_type_fields_list
 
-   52 declaration: type_declaration
-   53            | var_declaration
-   54            | function_declaration
+  58  init_type_fields_list : ID COLON ID
+  59                        | init_type_fields_list COMMA ID COLON ID
 
-   55 declaration_list: declaration
-   56                 | declaration_list declaration
+  60  var_declarator : VAR ID ASSIGN expression
+  61                 | VAR ID COLON ID ASSIGN expression
 
-   57 type_declaration: TYPE ID EQ type_definition
+  62  function_declarator : FUNCTION ID LPAREN type_fields RPAREN EQ statement
+  63                      | FUNCTION ID LPAREN type_fields RPAREN COLON ID EQ statement
 
-   58 type_definition: ID
-   59                | LBRACE RBRACE
-   60                | LBRACE type_list RBRACE
-   61                | ARRAY OF ID
+  64  statement : expression_statement
+  65            | selection_statement
+  66            | iteration_statement
+  67            | jump_statement
+  68            | let_statement
 
-   62 type_list: ID COLON ID
-   63          | type_list COMMA ID COLON ID
+  69  compound_statement : LPAREN init_statement_list RPAREN
 
-   64 var_declaration: VAR ID ASSIGN expression
-   65                | VAR ID COLON ID ASSIGN expression
+  70  init_statement_list :
+  71                      | statement_list
 
-   66 function_declaration: FUNCTION ID LPAREN RPAREN EQ expression
-   67                     | FUNCTION ID LPAREN RPAREN COLON ID EQ expression
-   68                     | FUNCTION ID LPAREN type_list RPAREN EQ expression
-   69                     | FUNCTION ID LPAREN type_list RPAREN COLON ID EQ expression
+  72  statement_list : statement
+  73                 | statement_list SEMICOLON statement
 
-   70 statement: BREAK
-   71          | IF expression THEN expression
-   72          | IF expression THEN expression ELSE expression
-   73          | WHILE expression DO expression
-   74          | FOR ID ASSIGN expression TO expression DO expression
-   75          | LET declaration_list IN expression END
-   76          | LET declaration_list IN END
+  74  expression_statement : expression
 
+  75  selection_statement : IF expression THEN statement
+  76                      | IF expression THEN statement ELSE statement
 
-Terminals, with rules where they appear
+  77  iteration_statement : WHILE expression DO statement
+  78                      | FOR ID ASSIGN expression TO expression DO statement
 
-$end (0) 0
-error (256)
-ID (258) 3 9 12 39 40 41 42 57 58 61 62 63 64 65 66 67 68 69 74
-STRING (259) 6
-INT (260) 5
-COMMA (261) 17 42 63
-COLON (262) 62 63 65 67 69
-SEMICOLON (263) 50 51
-LPAREN (264) 7 8 14 15 66 67 68 69
-RPAREN (265) 7 8 14 15 66 67 68 69
-LBRACK (266) 9 13
-RBRACK (267) 9 13
-LBRACE (268) 39 40 59 60
-RBRACE (269) 39 40 59 60
-DOT (270) 12
-PLUS (271) 24
-MINUS (272) 19 25
-TIMES (273) 21
-DIVIDE (274) 22
-EQ (275) 27 41 42 57 66 67 68 69
-NEQ (276) 28
-LT (277) 30
-LE (278) 32
-GT (279) 31
-GE (280) 33
-AND (281) 35
-OR (282) 37
-ASSIGN (283) 47 64 65 74
-ARRAY (284) 61
-IF (285) 71 72
-THEN (286) 71 72
-ELSE (287) 72
-WHILE (288) 73
-FOR (289) 74
-TO (290) 74
-DO (291) 73 74
-LET (292) 75 76
-IN (293) 75 76
-END (294) 75 76
-OF (295) 38 61
-BREAK (296) 70
-NIL (297) 4
-FUNCTION (298) 66 67 68 69
-VAR (299) 64 65
-TYPE (300) 57
-UMINUS (301)
+  79  jump_statement : BREAK
 
-
-Nonterminals, with rules where they appear
-
-$accept (47)
-    on left: 0
-program (48)
-    on left: 1 2, on right: 0
-primary_expression (49)
-    on left: 3 4 5 6 7 8, on right: 10
-array_expression (50)
-    on left: 9, on right: 11 38
-postfix_expression (51)
-    on left: 10 11 12 13 14 15, on right: 12 13 14 15 18
-argument_list (52)
-    on left: 16 17, on right: 15 17
-unary_expression (53)
-    on left: 18 19, on right: 19 20 21 22 47
-multiplicative_expression (54)
-    on left: 20 21 22, on right: 21 22 23 24 25
-additive_expression (55)
-    on left: 23 24 25, on right: 24 25 26 27 28
-equality_expression (56)
-    on left: 26 27 28, on right: 27 28 29 30 31 32 33
-relational_expression (57)
-    on left: 29 30 31 32 33, on right: 30 31 32 33 34 35
-AND_expression (58)
-    on left: 34 35, on right: 35 36 37
-inclusive_OR_expression (59)
-    on left: 36 37, on right: 37 43
-array_creation (60)
-    on left: 38, on right: 44
-struct_creation (61)
-    on left: 39 40, on right: 45
-field_list (62)
-    on left: 41 42, on right: 40 42
-value_expression (63)
-    on left: 43 44 45, on right: 38 46 47
-assignment_expression (64)
-    on left: 46 47, on right: 49 51
-expression (65)
-    on left: 48 49 50 51, on right: 8 9 13 16 17 41 42 50 51 64 65
-    66 67 68 69 71 72 73 74 75
-declaration (66)
-    on left: 52 53 54, on right: 55 56
-declaration_list (67)
-    on left: 55 56, on right: 56 75 76
-type_declaration (68)
-    on left: 57, on right: 52
-type_definition (69)
-    on left: 58 59 60 61, on right: 57
-type_list (70)
-    on left: 62 63, on right: 60 63 68 69
-var_declaration (71)
-    on left: 64 65, on right: 53
-function_declaration (72)
-    on left: 66 67 68 69, on right: 54
-statement (73)
-    on left: 70 71 72 73 74 75 76, on right: 2 48 50
-
-
+  80  let_statement : LET declaration IN statement_list END
+
 state 0
+	$accept : . program $end  (0)
 
-    0 $accept: . program $end
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	IF  shift 6
+	WHILE  shift 7
+	FOR  shift 8
+	LET  shift 9
+	BREAK  shift 10
+	NIL  shift 11
+	.  error
 
-    IF     shift, and go to state 1
-    WHILE  shift, and go to state 2
-    FOR    shift, and go to state 3
-    LET    shift, and go to state 4
-    BREAK  shift, and go to state 5
+	program  goto 12
+	statement  goto 13
+	primary_expression  goto 14
+	expression  goto 15
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
+	expression_statement  goto 26
+	selection_statement  goto 27
+	iteration_statement  goto 28
+	jump_statement  goto 29
+	let_statement  goto 30
 
-    $default  reduce using rule 1 (program)
 
-    program    go to state 6
-    statement  go to state 7
-
-
+1: shift/reduce conflict (shift 31, reduce 12) on LBRACK
 state 1
+	primary_expression : ID . LBRACE type_fields_initializer RBRACE  (6)
+	postfix_expression : ID .  (12)
+	postfix_expression : ID . LBRACK expression RBRACK  (13)
+	expression : ID . LBRACK expression RBRACK OF expression  (43)
 
-   71 statement: IF . expression THEN expression
-   72          | IF . expression THEN expression ELSE expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 28
-    statement                  go to state 29
+	LBRACK  shift 31
+	LBRACE  shift 32
+	$end  reduce 12
+	COMMA  reduce 12
+	SEMICOLON  reduce 12
+	LPAREN  reduce 12
+	RPAREN  reduce 12
+	RBRACK  reduce 12
+	RBRACE  reduce 12
+	DOT  reduce 12
+	PLUS  reduce 12
+	MINUS  reduce 12
+	TIMES  reduce 12
+	DIVIDE  reduce 12
+	EQ  reduce 12
+	NEQ  reduce 12
+	LT  reduce 12
+	LE  reduce 12
+	GT  reduce 12
+	GE  reduce 12
+	AND  reduce 12
+	OR  reduce 12
+	ASSIGN  reduce 12
+	THEN  reduce 12
+	ELSE  reduce 12
+	TO  reduce 12
+	DO  reduce 12
+	IN  reduce 12
+	END  reduce 12
+	FUNCTION  reduce 12
+	VAR  reduce 12
+	TYPE  reduce 12
 
 
 state 2
+	primary_expression : STRING .  (4)
 
-   73 statement: WHILE . expression DO expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 30
-    statement                  go to state 29
+	.  reduce 4
 
 
 state 3
+	primary_expression : INT .  (3)
 
-   74 statement: FOR . ID ASSIGN expression TO expression DO expression
-
-    ID  shift, and go to state 31
+	.  reduce 3
 
 
 state 4
+	primary_expression : LPAREN . expression RPAREN  (5)
+	compound_statement : LPAREN . init_statement_list RPAREN  (69)
+	init_statement_list : .  (70)
 
-   75 statement: LET . declaration_list IN expression END
-   76          | LET . declaration_list IN END
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	IF  shift 6
+	WHILE  shift 7
+	FOR  shift 8
+	LET  shift 9
+	BREAK  shift 10
+	NIL  shift 11
+	RPAREN  reduce 70
 
-    FUNCTION  shift, and go to state 32
-    VAR       shift, and go to state 33
-    TYPE      shift, and go to state 34
-
-    declaration           go to state 35
-    declaration_list      go to state 36
-    type_declaration      go to state 37
-    var_declaration       go to state 38
-    function_declaration  go to state 39
+	statement  goto 33
+	primary_expression  goto 14
+	expression  goto 34
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
+	expression_statement  goto 26
+	selection_statement  goto 27
+	iteration_statement  goto 28
+	jump_statement  goto 29
+	let_statement  goto 30
+	init_statement_list  goto 35
+	statement_list  goto 36
 
 
 state 5
+	unary_expression : MINUS . unary_expression  (21)
 
-   70 statement: BREAK .
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    $default  reduce using rule 70 (statement)
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 39
 
 
 state 6
+	selection_statement : IF . expression THEN statement  (75)
+	selection_statement : IF . expression THEN statement ELSE statement  (76)
 
-    0 $accept: program . $end
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    $end  shift, and go to state 40
+	primary_expression  goto 14
+	expression  goto 40
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 7
+	iteration_statement : WHILE . expression DO statement  (77)
 
-    2 program: statement .
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    $default  reduce using rule 2 (program)
+	primary_expression  goto 14
+	expression  goto 41
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 8
+	iteration_statement : FOR . ID ASSIGN expression TO expression DO statement  (78)
 
-    3 primary_expression: ID .
-    9 array_expression: ID . LBRACK expression RBRACK
-   39 struct_creation: ID . LBRACE RBRACE
-   40                | ID . LBRACE field_list RBRACE
-
-    LBRACK  shift, and go to state 41
-    LBRACE  shift, and go to state 42
-
-    LBRACK    [reduce using rule 3 (primary_expression)]
-    $default  reduce using rule 3 (primary_expression)
+	ID  shift 42
+	.  error
 
 
 state 9
+	let_statement : LET . declaration IN statement_list END  (80)
+	declaration : .  (45)
 
-    6 primary_expression: STRING .
+	FUNCTION  shift 43
+	VAR  shift 44
+	TYPE  shift 45
+	IN  reduce 45
 
-    $default  reduce using rule 6 (primary_expression)
+	declaration  goto 46
+	init_declarator_list  goto 47
+	init_declarator  goto 48
+	type_declarator  goto 49
+	var_declarator  goto 50
+	function_declarator  goto 51
 
 
 state 10
+	jump_statement : BREAK .  (79)
 
-    5 primary_expression: INT .
-
-    $default  reduce using rule 5 (primary_expression)
+	.  reduce 79
 
 
 state 11
+	primary_expression : NIL .  (2)
 
-    7 primary_expression: LPAREN . RPAREN
-    8                   | LPAREN . expression RPAREN
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    RPAREN  shift, and go to state 43
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 44
-    statement                  go to state 29
+	.  reduce 2
 
 
 state 12
+	$accept : program . $end  (0)
 
-   19 unary_expression: MINUS . unary_expression
-
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression  go to state 14
-    array_expression    go to state 46
-    postfix_expression  go to state 16
-    unary_expression    go to state 47
+	$end  accept
 
 
 state 13
+	program : statement .  (1)
 
-    4 primary_expression: NIL .
-
-    $default  reduce using rule 4 (primary_expression)
+	.  reduce 1
 
 
 state 14
+	postfix_expression : primary_expression .  (11)
 
-   10 postfix_expression: primary_expression .
-
-    $default  reduce using rule 10 (postfix_expression)
+	.  reduce 11
 
 
 state 15
+	expression_statement : expression .  (74)
 
-   11 postfix_expression: array_expression .
-   38 array_creation: array_expression . OF value_expression
-
-    OF  shift, and go to state 48
-
-    $default  reduce using rule 11 (postfix_expression)
+	.  reduce 74
 
 
 state 16
+	postfix_expression : postfix_expression . LBRACK expression RBRACK  (14)
+	postfix_expression : postfix_expression . LPAREN RPAREN  (15)
+	postfix_expression : postfix_expression . LPAREN argument_expression_list RPAREN  (16)
+	postfix_expression : postfix_expression . DOT ID  (17)
+	unary_expression : postfix_expression .  (20)
 
-   12 postfix_expression: postfix_expression . DOT ID
-   13                   | postfix_expression . LBRACK expression RBRACK
-   14                   | postfix_expression . LPAREN RPAREN
-   15                   | postfix_expression . LPAREN argument_list RPAREN
-   18 unary_expression: postfix_expression .
-
-    LPAREN  shift, and go to state 49
-    LBRACK  shift, and go to state 50
-    DOT     shift, and go to state 51
-
-    $default  reduce using rule 18 (unary_expression)
+	LPAREN  shift 52
+	LBRACK  shift 53
+	DOT  shift 54
+	$end  reduce 20
+	COMMA  reduce 20
+	SEMICOLON  reduce 20
+	RPAREN  reduce 20
+	RBRACK  reduce 20
+	RBRACE  reduce 20
+	PLUS  reduce 20
+	MINUS  reduce 20
+	TIMES  reduce 20
+	DIVIDE  reduce 20
+	EQ  reduce 20
+	NEQ  reduce 20
+	LT  reduce 20
+	LE  reduce 20
+	GT  reduce 20
+	GE  reduce 20
+	AND  reduce 20
+	OR  reduce 20
+	ASSIGN  reduce 20
+	THEN  reduce 20
+	ELSE  reduce 20
+	TO  reduce 20
+	DO  reduce 20
+	IN  reduce 20
+	END  reduce 20
+	FUNCTION  reduce 20
+	VAR  reduce 20
+	TYPE  reduce 20
 
 
 state 17
+	multiplicative_expression : unary_expression .  (22)
+	assignment_expression : unary_expression . ASSIGN assignment_expression  (41)
 
-   20 multiplicative_expression: unary_expression .
-   47 assignment_expression: unary_expression . ASSIGN value_expression
-
-    ASSIGN  shift, and go to state 52
-
-    $default  reduce using rule 20 (multiplicative_expression)
+	ASSIGN  shift 55
+	$end  reduce 22
+	COMMA  reduce 22
+	SEMICOLON  reduce 22
+	RPAREN  reduce 22
+	RBRACK  reduce 22
+	RBRACE  reduce 22
+	PLUS  reduce 22
+	MINUS  reduce 22
+	TIMES  reduce 22
+	DIVIDE  reduce 22
+	EQ  reduce 22
+	NEQ  reduce 22
+	LT  reduce 22
+	LE  reduce 22
+	GT  reduce 22
+	GE  reduce 22
+	AND  reduce 22
+	OR  reduce 22
+	THEN  reduce 22
+	ELSE  reduce 22
+	TO  reduce 22
+	DO  reduce 22
+	IN  reduce 22
+	END  reduce 22
+	FUNCTION  reduce 22
+	VAR  reduce 22
+	TYPE  reduce 22
 
 
 state 18
+	multiplicative_expression : multiplicative_expression . TIMES unary_expression  (23)
+	multiplicative_expression : multiplicative_expression . DIVIDE unary_expression  (24)
+	additive_expression : multiplicative_expression .  (25)
 
-   21 multiplicative_expression: multiplicative_expression . TIMES unary_expression
-   22                          | multiplicative_expression . DIVIDE unary_expression
-   23 additive_expression: multiplicative_expression .
-
-    TIMES   shift, and go to state 53
-    DIVIDE  shift, and go to state 54
-
-    $default  reduce using rule 23 (additive_expression)
+	TIMES  shift 56
+	DIVIDE  shift 57
+	$end  reduce 25
+	COMMA  reduce 25
+	SEMICOLON  reduce 25
+	RPAREN  reduce 25
+	RBRACK  reduce 25
+	RBRACE  reduce 25
+	PLUS  reduce 25
+	MINUS  reduce 25
+	EQ  reduce 25
+	NEQ  reduce 25
+	LT  reduce 25
+	LE  reduce 25
+	GT  reduce 25
+	GE  reduce 25
+	AND  reduce 25
+	OR  reduce 25
+	THEN  reduce 25
+	ELSE  reduce 25
+	TO  reduce 25
+	DO  reduce 25
+	IN  reduce 25
+	END  reduce 25
+	FUNCTION  reduce 25
+	VAR  reduce 25
+	TYPE  reduce 25
 
 
 state 19
+	additive_expression : additive_expression . PLUS multiplicative_expression  (26)
+	additive_expression : additive_expression . MINUS multiplicative_expression  (27)
+	relational_expression : additive_expression .  (28)
 
-   24 additive_expression: additive_expression . PLUS multiplicative_expression
-   25                    | additive_expression . MINUS multiplicative_expression
-   26 equality_expression: additive_expression .
-
-    PLUS   shift, and go to state 55
-    MINUS  shift, and go to state 56
-
-    $default  reduce using rule 26 (equality_expression)
+	PLUS  shift 58
+	MINUS  shift 59
+	$end  reduce 28
+	COMMA  reduce 28
+	SEMICOLON  reduce 28
+	RPAREN  reduce 28
+	RBRACK  reduce 28
+	RBRACE  reduce 28
+	EQ  reduce 28
+	NEQ  reduce 28
+	LT  reduce 28
+	LE  reduce 28
+	GT  reduce 28
+	GE  reduce 28
+	AND  reduce 28
+	OR  reduce 28
+	THEN  reduce 28
+	ELSE  reduce 28
+	TO  reduce 28
+	DO  reduce 28
+	IN  reduce 28
+	END  reduce 28
+	FUNCTION  reduce 28
+	VAR  reduce 28
+	TYPE  reduce 28
 
 
 state 20
+	relational_expression : relational_expression . LT additive_expression  (29)
+	relational_expression : relational_expression . GT additive_expression  (30)
+	relational_expression : relational_expression . LE additive_expression  (31)
+	relational_expression : relational_expression . GE additive_expression  (32)
+	equality_expression : relational_expression .  (33)
 
-   27 equality_expression: equality_expression . EQ additive_expression
-   28                    | equality_expression . NEQ additive_expression
-   29 relational_expression: equality_expression .
-
-    EQ   shift, and go to state 57
-    NEQ  shift, and go to state 58
-
-    $default  reduce using rule 29 (relational_expression)
+	LT  shift 60
+	LE  shift 61
+	GT  shift 62
+	GE  shift 63
+	$end  reduce 33
+	COMMA  reduce 33
+	SEMICOLON  reduce 33
+	RPAREN  reduce 33
+	RBRACK  reduce 33
+	RBRACE  reduce 33
+	EQ  reduce 33
+	NEQ  reduce 33
+	AND  reduce 33
+	OR  reduce 33
+	THEN  reduce 33
+	ELSE  reduce 33
+	TO  reduce 33
+	DO  reduce 33
+	IN  reduce 33
+	END  reduce 33
+	FUNCTION  reduce 33
+	VAR  reduce 33
+	TYPE  reduce 33
 
 
 state 21
+	equality_expression : equality_expression . EQ relational_expression  (34)
+	equality_expression : equality_expression . NEQ relational_expression  (35)
+	logical_and_expression : equality_expression .  (36)
 
-   30 relational_expression: relational_expression . LT equality_expression
-   31                      | relational_expression . GT equality_expression
-   32                      | relational_expression . LE equality_expression
-   33                      | relational_expression . GE equality_expression
-   34 AND_expression: relational_expression .
-
-    LT  shift, and go to state 59
-    LE  shift, and go to state 60
-    GT  shift, and go to state 61
-    GE  shift, and go to state 62
-
-    $default  reduce using rule 34 (AND_expression)
+	EQ  shift 64
+	NEQ  shift 65
+	$end  reduce 36
+	COMMA  reduce 36
+	SEMICOLON  reduce 36
+	RPAREN  reduce 36
+	RBRACK  reduce 36
+	RBRACE  reduce 36
+	AND  reduce 36
+	OR  reduce 36
+	THEN  reduce 36
+	ELSE  reduce 36
+	TO  reduce 36
+	DO  reduce 36
+	IN  reduce 36
+	END  reduce 36
+	FUNCTION  reduce 36
+	VAR  reduce 36
+	TYPE  reduce 36
 
 
 state 22
+	logical_and_expression : logical_and_expression . AND equality_expression  (37)
+	logical_or_expression : logical_and_expression .  (38)
 
-   35 AND_expression: AND_expression . AND relational_expression
-   36 inclusive_OR_expression: AND_expression .
-
-    AND  shift, and go to state 63
-
-    $default  reduce using rule 36 (inclusive_OR_expression)
+	AND  shift 66
+	$end  reduce 38
+	COMMA  reduce 38
+	SEMICOLON  reduce 38
+	RPAREN  reduce 38
+	RBRACK  reduce 38
+	RBRACE  reduce 38
+	OR  reduce 38
+	THEN  reduce 38
+	ELSE  reduce 38
+	TO  reduce 38
+	DO  reduce 38
+	IN  reduce 38
+	END  reduce 38
+	FUNCTION  reduce 38
+	VAR  reduce 38
+	TYPE  reduce 38
 
 
 state 23
+	logical_or_expression : logical_or_expression . OR logical_and_expression  (39)
+	assignment_expression : logical_or_expression .  (40)
 
-   37 inclusive_OR_expression: inclusive_OR_expression . OR AND_expression
-   43 value_expression: inclusive_OR_expression .
-
-    OR  shift, and go to state 64
-
-    $default  reduce using rule 43 (value_expression)
+	OR  shift 67
+	$end  reduce 40
+	COMMA  reduce 40
+	SEMICOLON  reduce 40
+	RPAREN  reduce 40
+	RBRACK  reduce 40
+	RBRACE  reduce 40
+	THEN  reduce 40
+	ELSE  reduce 40
+	TO  reduce 40
+	DO  reduce 40
+	IN  reduce 40
+	END  reduce 40
+	FUNCTION  reduce 40
+	VAR  reduce 40
+	TYPE  reduce 40
 
 
 state 24
+	expression : assignment_expression .  (42)
 
-   44 value_expression: array_creation .
-
-    $default  reduce using rule 44 (value_expression)
+	.  reduce 42
 
 
 state 25
+	expression : compound_statement .  (44)
 
-   45 value_expression: struct_creation .
-
-    $default  reduce using rule 45 (value_expression)
+	.  reduce 44
 
 
 state 26
+	statement : expression_statement .  (64)
 
-   46 assignment_expression: value_expression .
-
-    $default  reduce using rule 46 (assignment_expression)
+	.  reduce 64
 
 
 state 27
+	statement : selection_statement .  (65)
 
-   49 expression: assignment_expression .
-
-    $default  reduce using rule 49 (expression)
+	.  reduce 65
 
 
 state 28
+	statement : iteration_statement .  (66)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   71 statement: IF expression . THEN expression
-   72          | IF expression . THEN expression ELSE expression
-
-    SEMICOLON  shift, and go to state 65
-    THEN       shift, and go to state 66
+	.  reduce 66
 
 
 state 29
+	statement : jump_statement .  (67)
 
-   48 expression: statement .
-
-    $default  reduce using rule 48 (expression)
+	.  reduce 67
 
 
 state 30
+	statement : let_statement .  (68)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   73 statement: WHILE expression . DO expression
-
-    SEMICOLON  shift, and go to state 65
-    DO         shift, and go to state 67
+	.  reduce 68
 
 
 state 31
+	postfix_expression : ID LBRACK . expression RBRACK  (13)
+	expression : ID LBRACK . expression RBRACK OF expression  (43)
 
-   74 statement: FOR ID . ASSIGN expression TO expression DO expression
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ASSIGN  shift, and go to state 68
+	primary_expression  goto 14
+	expression  goto 68
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 32
+	primary_expression : ID LBRACE . type_fields_initializer RBRACE  (6)
+	type_fields_initializer : .  (7)
 
-   66 function_declaration: FUNCTION . ID LPAREN RPAREN EQ expression
-   67                     | FUNCTION . ID LPAREN RPAREN COLON ID EQ expression
-   68                     | FUNCTION . ID LPAREN type_list RPAREN EQ expression
-   69                     | FUNCTION . ID LPAREN type_list RPAREN COLON ID EQ expression
+	ID  shift 69
+	RBRACE  reduce 7
 
-    ID  shift, and go to state 69
+	type_fields_initializer  goto 70
+	type_fields_initializer_list  goto 71
 
 
 state 33
+	statement_list : statement .  (72)
 
-   64 var_declaration: VAR . ID ASSIGN expression
-   65                | VAR . ID COLON ID ASSIGN expression
-
-    ID  shift, and go to state 70
+	.  reduce 72
 
 
+34: shift/reduce conflict (shift 72, reduce 74) on RPAREN
 state 34
+	primary_expression : LPAREN expression . RPAREN  (5)
+	expression_statement : expression .  (74)
 
-   57 type_declaration: TYPE . ID EQ type_definition
-
-    ID  shift, and go to state 71
+	RPAREN  shift 72
+	SEMICOLON  reduce 74
 
 
 state 35
+	compound_statement : LPAREN init_statement_list . RPAREN  (69)
 
-   55 declaration_list: declaration .
-
-    $default  reduce using rule 55 (declaration_list)
+	RPAREN  shift 73
+	.  error
 
 
 state 36
+	init_statement_list : statement_list .  (71)
+	statement_list : statement_list . SEMICOLON statement  (73)
 
-   56 declaration_list: declaration_list . declaration
-   75 statement: LET declaration_list . IN expression END
-   76          | LET declaration_list . IN END
-
-    IN        shift, and go to state 72
-    FUNCTION  shift, and go to state 32
-    VAR       shift, and go to state 33
-    TYPE      shift, and go to state 34
-
-    declaration           go to state 73
-    type_declaration      go to state 37
-    var_declaration       go to state 38
-    function_declaration  go to state 39
+	SEMICOLON  shift 74
+	RPAREN  reduce 71
 
 
+37: shift/reduce conflict (shift 75, reduce 12) on LBRACK
 state 37
+	primary_expression : ID . LBRACE type_fields_initializer RBRACE  (6)
+	postfix_expression : ID .  (12)
+	postfix_expression : ID . LBRACK expression RBRACK  (13)
 
-   52 declaration: type_declaration .
-
-    $default  reduce using rule 52 (declaration)
+	LBRACK  shift 75
+	LBRACE  shift 32
+	$end  reduce 12
+	COMMA  reduce 12
+	SEMICOLON  reduce 12
+	LPAREN  reduce 12
+	RPAREN  reduce 12
+	RBRACK  reduce 12
+	RBRACE  reduce 12
+	DOT  reduce 12
+	PLUS  reduce 12
+	MINUS  reduce 12
+	TIMES  reduce 12
+	DIVIDE  reduce 12
+	EQ  reduce 12
+	NEQ  reduce 12
+	LT  reduce 12
+	LE  reduce 12
+	GT  reduce 12
+	GE  reduce 12
+	AND  reduce 12
+	OR  reduce 12
+	ASSIGN  reduce 12
+	THEN  reduce 12
+	ELSE  reduce 12
+	TO  reduce 12
+	DO  reduce 12
+	IN  reduce 12
+	END  reduce 12
+	FUNCTION  reduce 12
+	VAR  reduce 12
+	TYPE  reduce 12
 
 
 state 38
+	primary_expression : LPAREN . expression RPAREN  (5)
 
-   53 declaration: var_declaration .
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    $default  reduce using rule 53 (declaration)
+	primary_expression  goto 14
+	expression  goto 76
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 39
+	unary_expression : MINUS unary_expression .  (21)
 
-   54 declaration: function_declaration .
-
-    $default  reduce using rule 54 (declaration)
+	.  reduce 21
 
 
 state 40
+	selection_statement : IF expression . THEN statement  (75)
+	selection_statement : IF expression . THEN statement ELSE statement  (76)
 
-    0 $accept: program $end .
-
-    $default  accept
+	THEN  shift 77
+	.  error
 
 
 state 41
+	iteration_statement : WHILE expression . DO statement  (77)
 
-    9 array_expression: ID LBRACK . expression RBRACK
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 74
-    statement                  go to state 29
+	DO  shift 78
+	.  error
 
 
 state 42
+	iteration_statement : FOR ID . ASSIGN expression TO expression DO statement  (78)
 
-   39 struct_creation: ID LBRACE . RBRACE
-   40                | ID LBRACE . field_list RBRACE
-
-    ID      shift, and go to state 75
-    RBRACE  shift, and go to state 76
-
-    field_list  go to state 77
+	ASSIGN  shift 79
+	.  error
 
 
 state 43
+	function_declarator : FUNCTION . ID LPAREN type_fields RPAREN EQ statement  (62)
+	function_declarator : FUNCTION . ID LPAREN type_fields RPAREN COLON ID EQ statement  (63)
 
-    7 primary_expression: LPAREN RPAREN .
-
-    $default  reduce using rule 7 (primary_expression)
+	ID  shift 80
+	.  error
 
 
 state 44
+	var_declarator : VAR . ID ASSIGN expression  (60)
+	var_declarator : VAR . ID COLON ID ASSIGN expression  (61)
 
-    8 primary_expression: LPAREN expression . RPAREN
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-
-    SEMICOLON  shift, and go to state 65
-    RPAREN     shift, and go to state 78
+	ID  shift 81
+	.  error
 
 
 state 45
+	type_declarator : TYPE . ID EQ type_definition  (52)
 
-    3 primary_expression: ID .
-    9 array_expression: ID . LBRACK expression RBRACK
-
-    LBRACK  shift, and go to state 41
-
-    LBRACK    [reduce using rule 3 (primary_expression)]
-    $default  reduce using rule 3 (primary_expression)
+	ID  shift 82
+	.  error
 
 
 state 46
+	let_statement : LET declaration . IN statement_list END  (80)
 
-   11 postfix_expression: array_expression .
-
-    $default  reduce using rule 11 (postfix_expression)
+	IN  shift 83
+	.  error
 
 
 state 47
+	declaration : init_declarator_list .  (46)
+	init_declarator_list : init_declarator_list . init_declarator  (48)
 
-   19 unary_expression: MINUS unary_expression .
+	FUNCTION  shift 43
+	VAR  shift 44
+	TYPE  shift 45
+	IN  reduce 46
 
-    $default  reduce using rule 19 (unary_expression)
+	init_declarator  goto 84
+	type_declarator  goto 49
+	var_declarator  goto 50
+	function_declarator  goto 51
 
 
 state 48
+	init_declarator_list : init_declarator .  (47)
 
-   38 array_creation: array_expression OF . value_expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 79
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 80
+	.  reduce 47
 
 
 state 49
+	init_declarator : type_declarator .  (49)
 
-   14 postfix_expression: postfix_expression LPAREN . RPAREN
-   15                   | postfix_expression LPAREN . argument_list RPAREN
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    RPAREN  shift, and go to state 81
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    argument_list              go to state 82
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 83
-    statement                  go to state 29
+	.  reduce 49
 
 
 state 50
+	init_declarator : var_declarator .  (50)
 
-   13 postfix_expression: postfix_expression LBRACK . expression RBRACK
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 84
-    statement                  go to state 29
+	.  reduce 50
 
 
 state 51
+	init_declarator : function_declarator .  (51)
 
-   12 postfix_expression: postfix_expression DOT . ID
-
-    ID  shift, and go to state 85
+	.  reduce 51
 
 
 state 52
+	postfix_expression : postfix_expression LPAREN . RPAREN  (15)
+	postfix_expression : postfix_expression LPAREN . argument_expression_list RPAREN  (16)
 
-   47 assignment_expression: unary_expression ASSIGN . value_expression
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	RPAREN  shift 85
+	MINUS  shift 5
+	IF  shift 6
+	WHILE  shift 7
+	FOR  shift 8
+	LET  shift 9
+	BREAK  shift 10
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 79
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 86
+	statement  goto 86
+	primary_expression  goto 14
+	expression  goto 15
+	postfix_expression  goto 16
+	argument_expression_list  goto 87
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
+	expression_statement  goto 26
+	selection_statement  goto 27
+	iteration_statement  goto 28
+	jump_statement  goto 29
+	let_statement  goto 30
 
 
 state 53
+	postfix_expression : postfix_expression LBRACK . expression RBRACK  (14)
 
-   21 multiplicative_expression: multiplicative_expression TIMES . unary_expression
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression  go to state 14
-    array_expression    go to state 46
-    postfix_expression  go to state 16
-    unary_expression    go to state 87
+	primary_expression  goto 14
+	expression  goto 88
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 54
+	postfix_expression : postfix_expression DOT . ID  (17)
 
-   22 multiplicative_expression: multiplicative_expression DIVIDE . unary_expression
-
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression  go to state 14
-    array_expression    go to state 46
-    postfix_expression  go to state 16
-    unary_expression    go to state 88
+	ID  shift 89
+	.  error
 
 
 state 55
+	assignment_expression : unary_expression ASSIGN . assignment_expression  (41)
 
-   24 additive_expression: additive_expression PLUS . multiplicative_expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 46
-    postfix_expression         go to state 16
-    unary_expression           go to state 79
-    multiplicative_expression  go to state 89
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 90
 
 
 state 56
+	multiplicative_expression : multiplicative_expression TIMES . unary_expression  (23)
 
-   25 additive_expression: additive_expression MINUS . multiplicative_expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 46
-    postfix_expression         go to state 16
-    unary_expression           go to state 79
-    multiplicative_expression  go to state 90
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 91
 
 
 state 57
+	multiplicative_expression : multiplicative_expression DIVIDE . unary_expression  (24)
 
-   27 equality_expression: equality_expression EQ . additive_expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 46
-    postfix_expression         go to state 16
-    unary_expression           go to state 79
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 91
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 92
 
 
 state 58
+	additive_expression : additive_expression PLUS . multiplicative_expression  (26)
 
-   28 equality_expression: equality_expression NEQ . additive_expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 46
-    postfix_expression         go to state 16
-    unary_expression           go to state 79
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 92
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 93
+	multiplicative_expression  goto 94
 
 
 state 59
+	additive_expression : additive_expression MINUS . multiplicative_expression  (27)
 
-   30 relational_expression: relational_expression LT . equality_expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 46
-    postfix_expression         go to state 16
-    unary_expression           go to state 79
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 93
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 93
+	multiplicative_expression  goto 95
 
 
 state 60
+	relational_expression : relational_expression LT . additive_expression  (29)
 
-   32 relational_expression: relational_expression LE . equality_expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 46
-    postfix_expression         go to state 16
-    unary_expression           go to state 79
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 94
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 93
+	multiplicative_expression  goto 18
+	additive_expression  goto 96
 
 
 state 61
+	relational_expression : relational_expression LE . additive_expression  (31)
 
-   31 relational_expression: relational_expression GT . equality_expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 46
-    postfix_expression         go to state 16
-    unary_expression           go to state 79
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 95
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 93
+	multiplicative_expression  goto 18
+	additive_expression  goto 97
 
 
 state 62
+	relational_expression : relational_expression GT . additive_expression  (30)
 
-   33 relational_expression: relational_expression GE . equality_expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 46
-    postfix_expression         go to state 16
-    unary_expression           go to state 79
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 96
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 93
+	multiplicative_expression  goto 18
+	additive_expression  goto 98
 
 
 state 63
+	relational_expression : relational_expression GE . additive_expression  (32)
 
-   35 AND_expression: AND_expression AND . relational_expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 46
-    postfix_expression         go to state 16
-    unary_expression           go to state 79
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 97
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 93
+	multiplicative_expression  goto 18
+	additive_expression  goto 99
 
 
 state 64
+	equality_expression : equality_expression EQ . relational_expression  (34)
 
-   37 inclusive_OR_expression: inclusive_OR_expression OR . AND_expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 45
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 46
-    postfix_expression         go to state 16
-    unary_expression           go to state 79
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 98
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 93
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 100
 
 
 state 65
+	equality_expression : equality_expression NEQ . relational_expression  (35)
 
-   50 expression: expression SEMICOLON . statement
-   51           | expression SEMICOLON . assignment_expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 99
-    statement                  go to state 100
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 93
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 101
 
 
 state 66
+	logical_and_expression : logical_and_expression AND . equality_expression  (37)
 
-   71 statement: IF expression THEN . expression
-   72          | IF expression THEN . expression ELSE expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 101
-    statement                  go to state 29
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 93
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 102
 
 
 state 67
+	logical_or_expression : logical_or_expression OR . logical_and_expression  (39)
 
-   73 statement: WHILE expression DO . expression
+	ID  shift 37
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 38
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 102
-    statement                  go to state 29
+	primary_expression  goto 14
+	postfix_expression  goto 16
+	unary_expression  goto 93
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 103
 
 
 state 68
+	postfix_expression : ID LBRACK expression . RBRACK  (13)
+	expression : ID LBRACK expression . RBRACK OF expression  (43)
 
-   74 statement: FOR ID ASSIGN . expression TO expression DO expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 103
-    statement                  go to state 29
+	RBRACK  shift 104
+	.  error
 
 
 state 69
+	type_fields_initializer_list : ID . EQ expression  (9)
 
-   66 function_declaration: FUNCTION ID . LPAREN RPAREN EQ expression
-   67                     | FUNCTION ID . LPAREN RPAREN COLON ID EQ expression
-   68                     | FUNCTION ID . LPAREN type_list RPAREN EQ expression
-   69                     | FUNCTION ID . LPAREN type_list RPAREN COLON ID EQ expression
-
-    LPAREN  shift, and go to state 104
+	EQ  shift 105
+	.  error
 
 
 state 70
+	primary_expression : ID LBRACE type_fields_initializer . RBRACE  (6)
 
-   64 var_declaration: VAR ID . ASSIGN expression
-   65                | VAR ID . COLON ID ASSIGN expression
-
-    COLON   shift, and go to state 105
-    ASSIGN  shift, and go to state 106
+	RBRACE  shift 106
+	.  error
 
 
 state 71
+	type_fields_initializer : type_fields_initializer_list .  (8)
+	type_fields_initializer_list : type_fields_initializer_list . COMMA ID EQ expression  (10)
 
-   57 type_declaration: TYPE ID . EQ type_definition
-
-    EQ  shift, and go to state 107
+	COMMA  shift 107
+	RBRACE  reduce 8
 
 
 state 72
+	primary_expression : LPAREN expression RPAREN .  (5)
 
-   75 statement: LET declaration_list IN . expression END
-   76          | LET declaration_list IN . END
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    END     shift, and go to state 108
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 109
-    statement                  go to state 29
+	.  reduce 5
 
 
 state 73
+	compound_statement : LPAREN init_statement_list RPAREN .  (69)
 
-   56 declaration_list: declaration_list declaration .
-
-    $default  reduce using rule 56 (declaration_list)
+	.  reduce 69
 
 
 state 74
+	statement_list : statement_list SEMICOLON . statement  (73)
 
-    9 array_expression: ID LBRACK expression . RBRACK
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	IF  shift 6
+	WHILE  shift 7
+	FOR  shift 8
+	LET  shift 9
+	BREAK  shift 10
+	NIL  shift 11
+	.  error
 
-    SEMICOLON  shift, and go to state 65
-    RBRACK     shift, and go to state 110
+	statement  goto 108
+	primary_expression  goto 14
+	expression  goto 15
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
+	expression_statement  goto 26
+	selection_statement  goto 27
+	iteration_statement  goto 28
+	jump_statement  goto 29
+	let_statement  goto 30
 
 
 state 75
+	postfix_expression : ID LBRACK . expression RBRACK  (13)
 
-   41 field_list: ID . EQ expression
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    EQ  shift, and go to state 111
+	primary_expression  goto 14
+	expression  goto 109
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 76
+	primary_expression : LPAREN expression . RPAREN  (5)
 
-   39 struct_creation: ID LBRACE RBRACE .
-
-    $default  reduce using rule 39 (struct_creation)
+	RPAREN  shift 72
+	.  error
 
 
 state 77
+	selection_statement : IF expression THEN . statement  (75)
+	selection_statement : IF expression THEN . statement ELSE statement  (76)
 
-   40 struct_creation: ID LBRACE field_list . RBRACE
-   42 field_list: field_list . COMMA ID EQ expression
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	IF  shift 6
+	WHILE  shift 7
+	FOR  shift 8
+	LET  shift 9
+	BREAK  shift 10
+	NIL  shift 11
+	.  error
 
-    COMMA   shift, and go to state 112
-    RBRACE  shift, and go to state 113
+	statement  goto 110
+	primary_expression  goto 14
+	expression  goto 15
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
+	expression_statement  goto 26
+	selection_statement  goto 27
+	iteration_statement  goto 28
+	jump_statement  goto 29
+	let_statement  goto 30
 
 
 state 78
+	iteration_statement : WHILE expression DO . statement  (77)
 
-    8 primary_expression: LPAREN expression RPAREN .
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	IF  shift 6
+	WHILE  shift 7
+	FOR  shift 8
+	LET  shift 9
+	BREAK  shift 10
+	NIL  shift 11
+	.  error
 
-    $default  reduce using rule 8 (primary_expression)
+	statement  goto 111
+	primary_expression  goto 14
+	expression  goto 15
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
+	expression_statement  goto 26
+	selection_statement  goto 27
+	iteration_statement  goto 28
+	jump_statement  goto 29
+	let_statement  goto 30
 
 
 state 79
+	iteration_statement : FOR ID ASSIGN . expression TO expression DO statement  (78)
 
-   20 multiplicative_expression: unary_expression .
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    $default  reduce using rule 20 (multiplicative_expression)
+	primary_expression  goto 14
+	expression  goto 112
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 80
+	function_declarator : FUNCTION ID . LPAREN type_fields RPAREN EQ statement  (62)
+	function_declarator : FUNCTION ID . LPAREN type_fields RPAREN COLON ID EQ statement  (63)
 
-   38 array_creation: array_expression OF value_expression .
-
-    $default  reduce using rule 38 (array_creation)
+	LPAREN  shift 113
+	.  error
 
 
 state 81
+	var_declarator : VAR ID . ASSIGN expression  (60)
+	var_declarator : VAR ID . COLON ID ASSIGN expression  (61)
 
-   14 postfix_expression: postfix_expression LPAREN RPAREN .
-
-    $default  reduce using rule 14 (postfix_expression)
+	COLON  shift 114
+	ASSIGN  shift 115
+	.  error
 
 
 state 82
+	type_declarator : TYPE ID . EQ type_definition  (52)
 
-   15 postfix_expression: postfix_expression LPAREN argument_list . RPAREN
-   17 argument_list: argument_list . COMMA expression
-
-    COMMA   shift, and go to state 114
-    RPAREN  shift, and go to state 115
+	EQ  shift 116
+	.  error
 
 
 state 83
+	let_statement : LET declaration IN . statement_list END  (80)
 
-   16 argument_list: expression .
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	IF  shift 6
+	WHILE  shift 7
+	FOR  shift 8
+	LET  shift 9
+	BREAK  shift 10
+	NIL  shift 11
+	.  error
 
-    SEMICOLON  shift, and go to state 65
-
-    $default  reduce using rule 16 (argument_list)
+	statement  goto 33
+	primary_expression  goto 14
+	expression  goto 15
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
+	expression_statement  goto 26
+	selection_statement  goto 27
+	iteration_statement  goto 28
+	jump_statement  goto 29
+	let_statement  goto 30
+	statement_list  goto 117
 
 
 state 84
+	init_declarator_list : init_declarator_list init_declarator .  (48)
 
-   13 postfix_expression: postfix_expression LBRACK expression . RBRACK
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-
-    SEMICOLON  shift, and go to state 65
-    RBRACK     shift, and go to state 116
+	.  reduce 48
 
 
 state 85
+	postfix_expression : postfix_expression LPAREN RPAREN .  (15)
 
-   12 postfix_expression: postfix_expression DOT ID .
-
-    $default  reduce using rule 12 (postfix_expression)
+	.  reduce 15
 
 
 state 86
+	argument_expression_list : statement .  (18)
 
-   47 assignment_expression: unary_expression ASSIGN value_expression .
-
-    $default  reduce using rule 47 (assignment_expression)
+	.  reduce 18
 
 
 state 87
+	postfix_expression : postfix_expression LPAREN argument_expression_list . RPAREN  (16)
+	argument_expression_list : argument_expression_list . COMMA statement  (19)
 
-   21 multiplicative_expression: multiplicative_expression TIMES unary_expression .
-
-    $default  reduce using rule 21 (multiplicative_expression)
+	COMMA  shift 118
+	RPAREN  shift 119
+	.  error
 
 
 state 88
+	postfix_expression : postfix_expression LBRACK expression . RBRACK  (14)
 
-   22 multiplicative_expression: multiplicative_expression DIVIDE unary_expression .
-
-    $default  reduce using rule 22 (multiplicative_expression)
+	RBRACK  shift 120
+	.  error
 
 
 state 89
+	postfix_expression : postfix_expression DOT ID .  (17)
 
-   21 multiplicative_expression: multiplicative_expression . TIMES unary_expression
-   22                          | multiplicative_expression . DIVIDE unary_expression
-   24 additive_expression: additive_expression PLUS multiplicative_expression .
-
-    TIMES   shift, and go to state 53
-    DIVIDE  shift, and go to state 54
-
-    $default  reduce using rule 24 (additive_expression)
+	.  reduce 17
 
 
 state 90
+	assignment_expression : unary_expression ASSIGN assignment_expression .  (41)
 
-   21 multiplicative_expression: multiplicative_expression . TIMES unary_expression
-   22                          | multiplicative_expression . DIVIDE unary_expression
-   25 additive_expression: additive_expression MINUS multiplicative_expression .
-
-    TIMES   shift, and go to state 53
-    DIVIDE  shift, and go to state 54
-
-    $default  reduce using rule 25 (additive_expression)
+	.  reduce 41
 
 
 state 91
+	multiplicative_expression : multiplicative_expression TIMES unary_expression .  (23)
 
-   24 additive_expression: additive_expression . PLUS multiplicative_expression
-   25                    | additive_expression . MINUS multiplicative_expression
-   27 equality_expression: equality_expression EQ additive_expression .
-
-    PLUS   shift, and go to state 55
-    MINUS  shift, and go to state 56
-
-    $default  reduce using rule 27 (equality_expression)
+	.  reduce 23
 
 
 state 92
+	multiplicative_expression : multiplicative_expression DIVIDE unary_expression .  (24)
 
-   24 additive_expression: additive_expression . PLUS multiplicative_expression
-   25                    | additive_expression . MINUS multiplicative_expression
-   28 equality_expression: equality_expression NEQ additive_expression .
-
-    PLUS   shift, and go to state 55
-    MINUS  shift, and go to state 56
-
-    $default  reduce using rule 28 (equality_expression)
+	.  reduce 24
 
 
 state 93
+	multiplicative_expression : unary_expression .  (22)
 
-   27 equality_expression: equality_expression . EQ additive_expression
-   28                    | equality_expression . NEQ additive_expression
-   30 relational_expression: relational_expression LT equality_expression .
-
-    EQ   shift, and go to state 57
-    NEQ  shift, and go to state 58
-
-    $default  reduce using rule 30 (relational_expression)
+	.  reduce 22
 
 
 state 94
+	multiplicative_expression : multiplicative_expression . TIMES unary_expression  (23)
+	multiplicative_expression : multiplicative_expression . DIVIDE unary_expression  (24)
+	additive_expression : additive_expression PLUS multiplicative_expression .  (26)
 
-   27 equality_expression: equality_expression . EQ additive_expression
-   28                    | equality_expression . NEQ additive_expression
-   32 relational_expression: relational_expression LE equality_expression .
-
-    EQ   shift, and go to state 57
-    NEQ  shift, and go to state 58
-
-    $default  reduce using rule 32 (relational_expression)
+	TIMES  shift 56
+	DIVIDE  shift 57
+	$end  reduce 26
+	COMMA  reduce 26
+	SEMICOLON  reduce 26
+	RPAREN  reduce 26
+	RBRACK  reduce 26
+	RBRACE  reduce 26
+	PLUS  reduce 26
+	MINUS  reduce 26
+	EQ  reduce 26
+	NEQ  reduce 26
+	LT  reduce 26
+	LE  reduce 26
+	GT  reduce 26
+	GE  reduce 26
+	AND  reduce 26
+	OR  reduce 26
+	THEN  reduce 26
+	ELSE  reduce 26
+	TO  reduce 26
+	DO  reduce 26
+	IN  reduce 26
+	END  reduce 26
+	FUNCTION  reduce 26
+	VAR  reduce 26
+	TYPE  reduce 26
 
 
 state 95
+	multiplicative_expression : multiplicative_expression . TIMES unary_expression  (23)
+	multiplicative_expression : multiplicative_expression . DIVIDE unary_expression  (24)
+	additive_expression : additive_expression MINUS multiplicative_expression .  (27)
 
-   27 equality_expression: equality_expression . EQ additive_expression
-   28                    | equality_expression . NEQ additive_expression
-   31 relational_expression: relational_expression GT equality_expression .
-
-    EQ   shift, and go to state 57
-    NEQ  shift, and go to state 58
-
-    $default  reduce using rule 31 (relational_expression)
+	TIMES  shift 56
+	DIVIDE  shift 57
+	$end  reduce 27
+	COMMA  reduce 27
+	SEMICOLON  reduce 27
+	RPAREN  reduce 27
+	RBRACK  reduce 27
+	RBRACE  reduce 27
+	PLUS  reduce 27
+	MINUS  reduce 27
+	EQ  reduce 27
+	NEQ  reduce 27
+	LT  reduce 27
+	LE  reduce 27
+	GT  reduce 27
+	GE  reduce 27
+	AND  reduce 27
+	OR  reduce 27
+	THEN  reduce 27
+	ELSE  reduce 27
+	TO  reduce 27
+	DO  reduce 27
+	IN  reduce 27
+	END  reduce 27
+	FUNCTION  reduce 27
+	VAR  reduce 27
+	TYPE  reduce 27
 
 
 state 96
+	additive_expression : additive_expression . PLUS multiplicative_expression  (26)
+	additive_expression : additive_expression . MINUS multiplicative_expression  (27)
+	relational_expression : relational_expression LT additive_expression .  (29)
 
-   27 equality_expression: equality_expression . EQ additive_expression
-   28                    | equality_expression . NEQ additive_expression
-   33 relational_expression: relational_expression GE equality_expression .
-
-    EQ   shift, and go to state 57
-    NEQ  shift, and go to state 58
-
-    $default  reduce using rule 33 (relational_expression)
+	PLUS  shift 58
+	MINUS  shift 59
+	$end  reduce 29
+	COMMA  reduce 29
+	SEMICOLON  reduce 29
+	RPAREN  reduce 29
+	RBRACK  reduce 29
+	RBRACE  reduce 29
+	EQ  reduce 29
+	NEQ  reduce 29
+	LT  reduce 29
+	LE  reduce 29
+	GT  reduce 29
+	GE  reduce 29
+	AND  reduce 29
+	OR  reduce 29
+	THEN  reduce 29
+	ELSE  reduce 29
+	TO  reduce 29
+	DO  reduce 29
+	IN  reduce 29
+	END  reduce 29
+	FUNCTION  reduce 29
+	VAR  reduce 29
+	TYPE  reduce 29
 
 
 state 97
+	additive_expression : additive_expression . PLUS multiplicative_expression  (26)
+	additive_expression : additive_expression . MINUS multiplicative_expression  (27)
+	relational_expression : relational_expression LE additive_expression .  (31)
 
-   30 relational_expression: relational_expression . LT equality_expression
-   31                      | relational_expression . GT equality_expression
-   32                      | relational_expression . LE equality_expression
-   33                      | relational_expression . GE equality_expression
-   35 AND_expression: AND_expression AND relational_expression .
-
-    LT  shift, and go to state 59
-    LE  shift, and go to state 60
-    GT  shift, and go to state 61
-    GE  shift, and go to state 62
-
-    $default  reduce using rule 35 (AND_expression)
+	PLUS  shift 58
+	MINUS  shift 59
+	$end  reduce 31
+	COMMA  reduce 31
+	SEMICOLON  reduce 31
+	RPAREN  reduce 31
+	RBRACK  reduce 31
+	RBRACE  reduce 31
+	EQ  reduce 31
+	NEQ  reduce 31
+	LT  reduce 31
+	LE  reduce 31
+	GT  reduce 31
+	GE  reduce 31
+	AND  reduce 31
+	OR  reduce 31
+	THEN  reduce 31
+	ELSE  reduce 31
+	TO  reduce 31
+	DO  reduce 31
+	IN  reduce 31
+	END  reduce 31
+	FUNCTION  reduce 31
+	VAR  reduce 31
+	TYPE  reduce 31
 
 
 state 98
+	additive_expression : additive_expression . PLUS multiplicative_expression  (26)
+	additive_expression : additive_expression . MINUS multiplicative_expression  (27)
+	relational_expression : relational_expression GT additive_expression .  (30)
 
-   35 AND_expression: AND_expression . AND relational_expression
-   37 inclusive_OR_expression: inclusive_OR_expression OR AND_expression .
-
-    AND  shift, and go to state 63
-
-    $default  reduce using rule 37 (inclusive_OR_expression)
+	PLUS  shift 58
+	MINUS  shift 59
+	$end  reduce 30
+	COMMA  reduce 30
+	SEMICOLON  reduce 30
+	RPAREN  reduce 30
+	RBRACK  reduce 30
+	RBRACE  reduce 30
+	EQ  reduce 30
+	NEQ  reduce 30
+	LT  reduce 30
+	LE  reduce 30
+	GT  reduce 30
+	GE  reduce 30
+	AND  reduce 30
+	OR  reduce 30
+	THEN  reduce 30
+	ELSE  reduce 30
+	TO  reduce 30
+	DO  reduce 30
+	IN  reduce 30
+	END  reduce 30
+	FUNCTION  reduce 30
+	VAR  reduce 30
+	TYPE  reduce 30
 
 
 state 99
+	additive_expression : additive_expression . PLUS multiplicative_expression  (26)
+	additive_expression : additive_expression . MINUS multiplicative_expression  (27)
+	relational_expression : relational_expression GE additive_expression .  (32)
 
-   51 expression: expression SEMICOLON assignment_expression .
-
-    $default  reduce using rule 51 (expression)
+	PLUS  shift 58
+	MINUS  shift 59
+	$end  reduce 32
+	COMMA  reduce 32
+	SEMICOLON  reduce 32
+	RPAREN  reduce 32
+	RBRACK  reduce 32
+	RBRACE  reduce 32
+	EQ  reduce 32
+	NEQ  reduce 32
+	LT  reduce 32
+	LE  reduce 32
+	GT  reduce 32
+	GE  reduce 32
+	AND  reduce 32
+	OR  reduce 32
+	THEN  reduce 32
+	ELSE  reduce 32
+	TO  reduce 32
+	DO  reduce 32
+	IN  reduce 32
+	END  reduce 32
+	FUNCTION  reduce 32
+	VAR  reduce 32
+	TYPE  reduce 32
 
 
 state 100
+	relational_expression : relational_expression . LT additive_expression  (29)
+	relational_expression : relational_expression . GT additive_expression  (30)
+	relational_expression : relational_expression . LE additive_expression  (31)
+	relational_expression : relational_expression . GE additive_expression  (32)
+	equality_expression : equality_expression EQ relational_expression .  (34)
 
-   50 expression: expression SEMICOLON statement .
-
-    $default  reduce using rule 50 (expression)
+	LT  shift 60
+	LE  shift 61
+	GT  shift 62
+	GE  shift 63
+	$end  reduce 34
+	COMMA  reduce 34
+	SEMICOLON  reduce 34
+	RPAREN  reduce 34
+	RBRACK  reduce 34
+	RBRACE  reduce 34
+	EQ  reduce 34
+	NEQ  reduce 34
+	AND  reduce 34
+	OR  reduce 34
+	THEN  reduce 34
+	ELSE  reduce 34
+	TO  reduce 34
+	DO  reduce 34
+	IN  reduce 34
+	END  reduce 34
+	FUNCTION  reduce 34
+	VAR  reduce 34
+	TYPE  reduce 34
 
 
 state 101
+	relational_expression : relational_expression . LT additive_expression  (29)
+	relational_expression : relational_expression . GT additive_expression  (30)
+	relational_expression : relational_expression . LE additive_expression  (31)
+	relational_expression : relational_expression . GE additive_expression  (32)
+	equality_expression : equality_expression NEQ relational_expression .  (35)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   71 statement: IF expression THEN expression .
-   72          | IF expression THEN expression . ELSE expression
-
-    SEMICOLON  shift, and go to state 65
-    ELSE       shift, and go to state 117
-
-    SEMICOLON  [reduce using rule 71 (statement)]
-    ELSE       [reduce using rule 71 (statement)]
-    $default   reduce using rule 71 (statement)
+	LT  shift 60
+	LE  shift 61
+	GT  shift 62
+	GE  shift 63
+	$end  reduce 35
+	COMMA  reduce 35
+	SEMICOLON  reduce 35
+	RPAREN  reduce 35
+	RBRACK  reduce 35
+	RBRACE  reduce 35
+	EQ  reduce 35
+	NEQ  reduce 35
+	AND  reduce 35
+	OR  reduce 35
+	THEN  reduce 35
+	ELSE  reduce 35
+	TO  reduce 35
+	DO  reduce 35
+	IN  reduce 35
+	END  reduce 35
+	FUNCTION  reduce 35
+	VAR  reduce 35
+	TYPE  reduce 35
 
 
 state 102
+	equality_expression : equality_expression . EQ relational_expression  (34)
+	equality_expression : equality_expression . NEQ relational_expression  (35)
+	logical_and_expression : logical_and_expression AND equality_expression .  (37)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   73 statement: WHILE expression DO expression .
-
-    SEMICOLON  shift, and go to state 65
-
-    SEMICOLON  [reduce using rule 73 (statement)]
-    $default   reduce using rule 73 (statement)
+	EQ  shift 64
+	NEQ  shift 65
+	$end  reduce 37
+	COMMA  reduce 37
+	SEMICOLON  reduce 37
+	RPAREN  reduce 37
+	RBRACK  reduce 37
+	RBRACE  reduce 37
+	AND  reduce 37
+	OR  reduce 37
+	THEN  reduce 37
+	ELSE  reduce 37
+	TO  reduce 37
+	DO  reduce 37
+	IN  reduce 37
+	END  reduce 37
+	FUNCTION  reduce 37
+	VAR  reduce 37
+	TYPE  reduce 37
 
 
 state 103
+	logical_and_expression : logical_and_expression . AND equality_expression  (37)
+	logical_or_expression : logical_or_expression OR logical_and_expression .  (39)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   74 statement: FOR ID ASSIGN expression . TO expression DO expression
-
-    SEMICOLON  shift, and go to state 65
-    TO         shift, and go to state 118
+	AND  shift 66
+	$end  reduce 39
+	COMMA  reduce 39
+	SEMICOLON  reduce 39
+	RPAREN  reduce 39
+	RBRACK  reduce 39
+	RBRACE  reduce 39
+	OR  reduce 39
+	THEN  reduce 39
+	ELSE  reduce 39
+	TO  reduce 39
+	DO  reduce 39
+	IN  reduce 39
+	END  reduce 39
+	FUNCTION  reduce 39
+	VAR  reduce 39
+	TYPE  reduce 39
 
 
 state 104
+	postfix_expression : ID LBRACK expression RBRACK .  (13)
+	expression : ID LBRACK expression RBRACK . OF expression  (43)
 
-   66 function_declaration: FUNCTION ID LPAREN . RPAREN EQ expression
-   67                     | FUNCTION ID LPAREN . RPAREN COLON ID EQ expression
-   68                     | FUNCTION ID LPAREN . type_list RPAREN EQ expression
-   69                     | FUNCTION ID LPAREN . type_list RPAREN COLON ID EQ expression
-
-    ID      shift, and go to state 119
-    RPAREN  shift, and go to state 120
-
-    type_list  go to state 121
+	OF  shift 121
+	$end  reduce 13
+	COMMA  reduce 13
+	SEMICOLON  reduce 13
+	LPAREN  reduce 13
+	RPAREN  reduce 13
+	LBRACK  reduce 13
+	RBRACK  reduce 13
+	RBRACE  reduce 13
+	DOT  reduce 13
+	PLUS  reduce 13
+	MINUS  reduce 13
+	TIMES  reduce 13
+	DIVIDE  reduce 13
+	EQ  reduce 13
+	NEQ  reduce 13
+	LT  reduce 13
+	LE  reduce 13
+	GT  reduce 13
+	GE  reduce 13
+	AND  reduce 13
+	OR  reduce 13
+	ASSIGN  reduce 13
+	THEN  reduce 13
+	ELSE  reduce 13
+	TO  reduce 13
+	DO  reduce 13
+	IN  reduce 13
+	END  reduce 13
+	FUNCTION  reduce 13
+	VAR  reduce 13
+	TYPE  reduce 13
 
 
 state 105
+	type_fields_initializer_list : ID EQ . expression  (9)
 
-   65 var_declaration: VAR ID COLON . ID ASSIGN expression
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID  shift, and go to state 122
+	primary_expression  goto 14
+	expression  goto 122
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 106
+	primary_expression : ID LBRACE type_fields_initializer RBRACE .  (6)
 
-   64 var_declaration: VAR ID ASSIGN . expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 123
-    statement                  go to state 29
+	.  reduce 6
 
 
 state 107
+	type_fields_initializer_list : type_fields_initializer_list COMMA . ID EQ expression  (10)
 
-   57 type_declaration: TYPE ID EQ . type_definition
-
-    ID      shift, and go to state 124
-    LBRACE  shift, and go to state 125
-    ARRAY   shift, and go to state 126
-
-    type_definition  go to state 127
+	ID  shift 123
+	.  error
 
 
 state 108
+	statement_list : statement_list SEMICOLON statement .  (73)
 
-   76 statement: LET declaration_list IN END .
-
-    $default  reduce using rule 76 (statement)
+	.  reduce 73
 
 
 state 109
+	postfix_expression : ID LBRACK expression . RBRACK  (13)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   75 statement: LET declaration_list IN expression . END
-
-    SEMICOLON  shift, and go to state 65
-    END        shift, and go to state 128
+	RBRACK  shift 124
+	.  error
 
 
+110: shift/reduce conflict (shift 125, reduce 75) on ELSE
 state 110
+	selection_statement : IF expression THEN statement .  (75)
+	selection_statement : IF expression THEN statement . ELSE statement  (76)
 
-    9 array_expression: ID LBRACK expression RBRACK .
-
-    $default  reduce using rule 9 (array_expression)
+	ELSE  shift 125
+	$end  reduce 75
+	COMMA  reduce 75
+	SEMICOLON  reduce 75
+	RPAREN  reduce 75
+	IN  reduce 75
+	END  reduce 75
+	FUNCTION  reduce 75
+	VAR  reduce 75
+	TYPE  reduce 75
 
 
 state 111
+	iteration_statement : WHILE expression DO statement .  (77)
 
-   41 field_list: ID EQ . expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 129
-    statement                  go to state 29
+	.  reduce 77
 
 
 state 112
+	iteration_statement : FOR ID ASSIGN expression . TO expression DO statement  (78)
 
-   42 field_list: field_list COMMA . ID EQ expression
-
-    ID  shift, and go to state 130
+	TO  shift 126
+	.  error
 
 
 state 113
+	function_declarator : FUNCTION ID LPAREN . type_fields RPAREN EQ statement  (62)
+	function_declarator : FUNCTION ID LPAREN . type_fields RPAREN COLON ID EQ statement  (63)
+	type_fields : .  (56)
 
-   40 struct_creation: ID LBRACE field_list RBRACE .
+	ID  shift 127
+	RPAREN  reduce 56
 
-    $default  reduce using rule 40 (struct_creation)
+	type_fields  goto 128
+	init_type_fields_list  goto 129
 
 
 state 114
+	var_declarator : VAR ID COLON . ID ASSIGN expression  (61)
 
-   17 argument_list: argument_list COMMA . expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 131
-    statement                  go to state 29
+	ID  shift 130
+	.  error
 
 
 state 115
+	var_declarator : VAR ID ASSIGN . expression  (60)
 
-   15 postfix_expression: postfix_expression LPAREN argument_list RPAREN .
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    $default  reduce using rule 15 (postfix_expression)
+	primary_expression  goto 14
+	expression  goto 131
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 116
+	type_declarator : TYPE ID EQ . type_definition  (52)
 
-   13 postfix_expression: postfix_expression LBRACK expression RBRACK .
+	ID  shift 132
+	LBRACE  shift 133
+	ARRAY  shift 134
+	.  error
 
-    $default  reduce using rule 13 (postfix_expression)
+	type_definition  goto 135
 
 
 state 117
+	statement_list : statement_list . SEMICOLON statement  (73)
+	let_statement : LET declaration IN statement_list . END  (80)
 
-   72 statement: IF expression THEN expression ELSE . expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 132
-    statement                  go to state 29
+	SEMICOLON  shift 74
+	END  shift 136
+	.  error
 
 
 state 118
+	argument_expression_list : argument_expression_list COMMA . statement  (19)
 
-   74 statement: FOR ID ASSIGN expression TO . expression DO expression
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	IF  shift 6
+	WHILE  shift 7
+	FOR  shift 8
+	LET  shift 9
+	BREAK  shift 10
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 133
-    statement                  go to state 29
+	statement  goto 137
+	primary_expression  goto 14
+	expression  goto 15
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
+	expression_statement  goto 26
+	selection_statement  goto 27
+	iteration_statement  goto 28
+	jump_statement  goto 29
+	let_statement  goto 30
 
 
 state 119
+	postfix_expression : postfix_expression LPAREN argument_expression_list RPAREN .  (16)
 
-   62 type_list: ID . COLON ID
-
-    COLON  shift, and go to state 134
+	.  reduce 16
 
 
 state 120
+	postfix_expression : postfix_expression LBRACK expression RBRACK .  (14)
 
-   66 function_declaration: FUNCTION ID LPAREN RPAREN . EQ expression
-   67                     | FUNCTION ID LPAREN RPAREN . COLON ID EQ expression
-
-    COLON  shift, and go to state 135
-    EQ     shift, and go to state 136
+	.  reduce 14
 
 
 state 121
+	expression : ID LBRACK expression RBRACK OF . expression  (43)
 
-   63 type_list: type_list . COMMA ID COLON ID
-   68 function_declaration: FUNCTION ID LPAREN type_list . RPAREN EQ expression
-   69                     | FUNCTION ID LPAREN type_list . RPAREN COLON ID EQ expression
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    COMMA   shift, and go to state 137
-    RPAREN  shift, and go to state 138
+	primary_expression  goto 14
+	expression  goto 138
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 122
+	type_fields_initializer_list : ID EQ expression .  (9)
 
-   65 var_declaration: VAR ID COLON ID . ASSIGN expression
-
-    ASSIGN  shift, and go to state 139
+	.  reduce 9
 
 
 state 123
+	type_fields_initializer_list : type_fields_initializer_list COMMA ID . EQ expression  (10)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   64 var_declaration: VAR ID ASSIGN expression .
-
-    SEMICOLON  shift, and go to state 65
-
-    $default  reduce using rule 64 (var_declaration)
+	EQ  shift 139
+	.  error
 
 
 state 124
+	postfix_expression : ID LBRACK expression RBRACK .  (13)
 
-   58 type_definition: ID .
-
-    $default  reduce using rule 58 (type_definition)
+	.  reduce 13
 
 
 state 125
+	selection_statement : IF expression THEN statement ELSE . statement  (76)
 
-   59 type_definition: LBRACE . RBRACE
-   60                | LBRACE . type_list RBRACE
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	IF  shift 6
+	WHILE  shift 7
+	FOR  shift 8
+	LET  shift 9
+	BREAK  shift 10
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 119
-    RBRACE  shift, and go to state 140
-
-    type_list  go to state 141
+	statement  goto 140
+	primary_expression  goto 14
+	expression  goto 15
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
+	expression_statement  goto 26
+	selection_statement  goto 27
+	iteration_statement  goto 28
+	jump_statement  goto 29
+	let_statement  goto 30
 
 
 state 126
+	iteration_statement : FOR ID ASSIGN expression TO . expression DO statement  (78)
 
-   61 type_definition: ARRAY . OF ID
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    OF  shift, and go to state 142
+	primary_expression  goto 14
+	expression  goto 141
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 127
+	init_type_fields_list : ID . COLON ID  (58)
 
-   57 type_declaration: TYPE ID EQ type_definition .
-
-    $default  reduce using rule 57 (type_declaration)
+	COLON  shift 142
+	.  error
 
 
 state 128
+	function_declarator : FUNCTION ID LPAREN type_fields . RPAREN EQ statement  (62)
+	function_declarator : FUNCTION ID LPAREN type_fields . RPAREN COLON ID EQ statement  (63)
 
-   75 statement: LET declaration_list IN expression END .
-
-    $default  reduce using rule 75 (statement)
+	RPAREN  shift 143
+	.  error
 
 
 state 129
+	type_fields : init_type_fields_list .  (57)
+	init_type_fields_list : init_type_fields_list . COMMA ID COLON ID  (59)
 
-   41 field_list: ID EQ expression .
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-
-    SEMICOLON  shift, and go to state 65
-
-    $default  reduce using rule 41 (field_list)
+	COMMA  shift 144
+	RPAREN  reduce 57
+	RBRACE  reduce 57
 
 
 state 130
+	var_declarator : VAR ID COLON ID . ASSIGN expression  (61)
 
-   42 field_list: field_list COMMA ID . EQ expression
-
-    EQ  shift, and go to state 143
+	ASSIGN  shift 145
+	.  error
 
 
 state 131
+	var_declarator : VAR ID ASSIGN expression .  (60)
 
-   17 argument_list: argument_list COMMA expression .
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-
-    SEMICOLON  shift, and go to state 65
-
-    $default  reduce using rule 17 (argument_list)
+	.  reduce 60
 
 
 state 132
+	type_definition : ID .  (53)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   72 statement: IF expression THEN expression ELSE expression .
-
-    SEMICOLON  shift, and go to state 65
-
-    SEMICOLON  [reduce using rule 72 (statement)]
-    $default   reduce using rule 72 (statement)
+	.  reduce 53
 
 
 state 133
+	type_definition : LBRACE . type_fields RBRACE  (54)
+	type_fields : .  (56)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   74 statement: FOR ID ASSIGN expression TO expression . DO expression
+	ID  shift 127
+	RBRACE  reduce 56
 
-    SEMICOLON  shift, and go to state 65
-    DO         shift, and go to state 144
+	type_fields  goto 146
+	init_type_fields_list  goto 129
 
 
 state 134
+	type_definition : ARRAY . OF ID  (55)
 
-   62 type_list: ID COLON . ID
-
-    ID  shift, and go to state 145
+	OF  shift 147
+	.  error
 
 
 state 135
+	type_declarator : TYPE ID EQ type_definition .  (52)
 
-   67 function_declaration: FUNCTION ID LPAREN RPAREN COLON . ID EQ expression
-
-    ID  shift, and go to state 146
+	.  reduce 52
 
 
 state 136
+	let_statement : LET declaration IN statement_list END .  (80)
 
-   66 function_declaration: FUNCTION ID LPAREN RPAREN EQ . expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 147
-    statement                  go to state 29
+	.  reduce 80
 
 
 state 137
+	argument_expression_list : argument_expression_list COMMA statement .  (19)
 
-   63 type_list: type_list COMMA . ID COLON ID
-
-    ID  shift, and go to state 148
+	.  reduce 19
 
 
 state 138
+	expression : ID LBRACK expression RBRACK OF expression .  (43)
 
-   68 function_declaration: FUNCTION ID LPAREN type_list RPAREN . EQ expression
-   69                     | FUNCTION ID LPAREN type_list RPAREN . COLON ID EQ expression
-
-    COLON  shift, and go to state 149
-    EQ     shift, and go to state 150
+	.  reduce 43
 
 
 state 139
+	type_fields_initializer_list : type_fields_initializer_list COMMA ID EQ . expression  (10)
 
-   65 var_declaration: VAR ID COLON ID ASSIGN . expression
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 151
-    statement                  go to state 29
+	primary_expression  goto 14
+	expression  goto 148
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 140
+	selection_statement : IF expression THEN statement ELSE statement .  (76)
 
-   59 type_definition: LBRACE RBRACE .
-
-    $default  reduce using rule 59 (type_definition)
+	.  reduce 76
 
 
 state 141
+	iteration_statement : FOR ID ASSIGN expression TO expression . DO statement  (78)
 
-   60 type_definition: LBRACE type_list . RBRACE
-   63 type_list: type_list . COMMA ID COLON ID
-
-    COMMA   shift, and go to state 137
-    RBRACE  shift, and go to state 152
+	DO  shift 149
+	.  error
 
 
 state 142
+	init_type_fields_list : ID COLON . ID  (58)
 
-   61 type_definition: ARRAY OF . ID
-
-    ID  shift, and go to state 153
+	ID  shift 150
+	.  error
 
 
 state 143
+	function_declarator : FUNCTION ID LPAREN type_fields RPAREN . EQ statement  (62)
+	function_declarator : FUNCTION ID LPAREN type_fields RPAREN . COLON ID EQ statement  (63)
 
-   42 field_list: field_list COMMA ID EQ . expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 154
-    statement                  go to state 29
+	COLON  shift 151
+	EQ  shift 152
+	.  error
 
 
 state 144
+	init_type_fields_list : init_type_fields_list COMMA . ID COLON ID  (59)
 
-   74 statement: FOR ID ASSIGN expression TO expression DO . expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 155
-    statement                  go to state 29
+	ID  shift 153
+	.  error
 
 
 state 145
+	var_declarator : VAR ID COLON ID ASSIGN . expression  (61)
 
-   62 type_list: ID COLON ID .
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	NIL  shift 11
+	.  error
 
-    $default  reduce using rule 62 (type_list)
+	primary_expression  goto 14
+	expression  goto 154
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
 
 
 state 146
+	type_definition : LBRACE type_fields . RBRACE  (54)
 
-   67 function_declaration: FUNCTION ID LPAREN RPAREN COLON ID . EQ expression
-
-    EQ  shift, and go to state 156
+	RBRACE  shift 155
+	.  error
 
 
 state 147
+	type_definition : ARRAY OF . ID  (55)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   66 function_declaration: FUNCTION ID LPAREN RPAREN EQ expression .
-
-    SEMICOLON  shift, and go to state 65
-
-    $default  reduce using rule 66 (function_declaration)
+	ID  shift 156
+	.  error
 
 
 state 148
+	type_fields_initializer_list : type_fields_initializer_list COMMA ID EQ expression .  (10)
 
-   63 type_list: type_list COMMA ID . COLON ID
-
-    COLON  shift, and go to state 157
+	.  reduce 10
 
 
 state 149
+	iteration_statement : FOR ID ASSIGN expression TO expression DO . statement  (78)
 
-   69 function_declaration: FUNCTION ID LPAREN type_list RPAREN COLON . ID EQ expression
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	IF  shift 6
+	WHILE  shift 7
+	FOR  shift 8
+	LET  shift 9
+	BREAK  shift 10
+	NIL  shift 11
+	.  error
 
-    ID  shift, and go to state 158
+	statement  goto 157
+	primary_expression  goto 14
+	expression  goto 15
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
+	expression_statement  goto 26
+	selection_statement  goto 27
+	iteration_statement  goto 28
+	jump_statement  goto 29
+	let_statement  goto 30
 
 
 state 150
+	init_type_fields_list : ID COLON ID .  (58)
 
-   68 function_declaration: FUNCTION ID LPAREN type_list RPAREN EQ . expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 159
-    statement                  go to state 29
+	.  reduce 58
 
 
 state 151
+	function_declarator : FUNCTION ID LPAREN type_fields RPAREN COLON . ID EQ statement  (63)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   65 var_declaration: VAR ID COLON ID ASSIGN expression .
-
-    SEMICOLON  shift, and go to state 65
-
-    $default  reduce using rule 65 (var_declaration)
+	ID  shift 158
+	.  error
 
 
 state 152
+	function_declarator : FUNCTION ID LPAREN type_fields RPAREN EQ . statement  (62)
 
-   60 type_definition: LBRACE type_list RBRACE .
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	IF  shift 6
+	WHILE  shift 7
+	FOR  shift 8
+	LET  shift 9
+	BREAK  shift 10
+	NIL  shift 11
+	.  error
 
-    $default  reduce using rule 60 (type_definition)
+	statement  goto 159
+	primary_expression  goto 14
+	expression  goto 15
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
+	expression_statement  goto 26
+	selection_statement  goto 27
+	iteration_statement  goto 28
+	jump_statement  goto 29
+	let_statement  goto 30
 
 
 state 153
+	init_type_fields_list : init_type_fields_list COMMA ID . COLON ID  (59)
 
-   61 type_definition: ARRAY OF ID .
-
-    $default  reduce using rule 61 (type_definition)
+	COLON  shift 160
+	.  error
 
 
 state 154
+	var_declarator : VAR ID COLON ID ASSIGN expression .  (61)
 
-   42 field_list: field_list COMMA ID EQ expression .
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-
-    SEMICOLON  shift, and go to state 65
-
-    $default  reduce using rule 42 (field_list)
+	.  reduce 61
 
 
 state 155
+	type_definition : LBRACE type_fields RBRACE .  (54)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   74 statement: FOR ID ASSIGN expression TO expression DO expression .
-
-    SEMICOLON  shift, and go to state 65
-
-    SEMICOLON  [reduce using rule 74 (statement)]
-    $default   reduce using rule 74 (statement)
+	.  reduce 54
 
 
 state 156
+	type_definition : ARRAY OF ID .  (55)
 
-   67 function_declaration: FUNCTION ID LPAREN RPAREN COLON ID EQ . expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 160
-    statement                  go to state 29
+	.  reduce 55
 
 
 state 157
+	iteration_statement : FOR ID ASSIGN expression TO expression DO statement .  (78)
 
-   63 type_list: type_list COMMA ID COLON . ID
-
-    ID  shift, and go to state 161
+	.  reduce 78
 
 
 state 158
+	function_declarator : FUNCTION ID LPAREN type_fields RPAREN COLON ID . EQ statement  (63)
 
-   69 function_declaration: FUNCTION ID LPAREN type_list RPAREN COLON ID . EQ expression
-
-    EQ  shift, and go to state 162
+	EQ  shift 161
+	.  error
 
 
 state 159
+	function_declarator : FUNCTION ID LPAREN type_fields RPAREN EQ statement .  (62)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   68 function_declaration: FUNCTION ID LPAREN type_list RPAREN EQ expression .
-
-    SEMICOLON  shift, and go to state 65
-
-    $default  reduce using rule 68 (function_declaration)
+	.  reduce 62
 
 
 state 160
+	init_type_fields_list : init_type_fields_list COMMA ID COLON . ID  (59)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   67 function_declaration: FUNCTION ID LPAREN RPAREN COLON ID EQ expression .
-
-    SEMICOLON  shift, and go to state 65
-
-    $default  reduce using rule 67 (function_declaration)
+	ID  shift 162
+	.  error
 
 
 state 161
+	function_declarator : FUNCTION ID LPAREN type_fields RPAREN COLON ID EQ . statement  (63)
 
-   63 type_list: type_list COMMA ID COLON ID .
+	ID  shift 1
+	STRING  shift 2
+	INT  shift 3
+	LPAREN  shift 4
+	MINUS  shift 5
+	IF  shift 6
+	WHILE  shift 7
+	FOR  shift 8
+	LET  shift 9
+	BREAK  shift 10
+	NIL  shift 11
+	.  error
 
-    $default  reduce using rule 63 (type_list)
+	statement  goto 163
+	primary_expression  goto 14
+	expression  goto 15
+	postfix_expression  goto 16
+	unary_expression  goto 17
+	multiplicative_expression  goto 18
+	additive_expression  goto 19
+	relational_expression  goto 20
+	equality_expression  goto 21
+	logical_and_expression  goto 22
+	logical_or_expression  goto 23
+	assignment_expression  goto 24
+	compound_statement  goto 25
+	expression_statement  goto 26
+	selection_statement  goto 27
+	iteration_statement  goto 28
+	jump_statement  goto 29
+	let_statement  goto 30
 
 
 state 162
+	init_type_fields_list : init_type_fields_list COMMA ID COLON ID .  (59)
 
-   69 function_declaration: FUNCTION ID LPAREN type_list RPAREN COLON ID EQ . expression
-
-    ID      shift, and go to state 8
-    STRING  shift, and go to state 9
-    INT     shift, and go to state 10
-    LPAREN  shift, and go to state 11
-    MINUS   shift, and go to state 12
-    IF      shift, and go to state 1
-    WHILE   shift, and go to state 2
-    FOR     shift, and go to state 3
-    LET     shift, and go to state 4
-    BREAK   shift, and go to state 5
-    NIL     shift, and go to state 13
-
-    primary_expression         go to state 14
-    array_expression           go to state 15
-    postfix_expression         go to state 16
-    unary_expression           go to state 17
-    multiplicative_expression  go to state 18
-    additive_expression        go to state 19
-    equality_expression        go to state 20
-    relational_expression      go to state 21
-    AND_expression             go to state 22
-    inclusive_OR_expression    go to state 23
-    array_creation             go to state 24
-    struct_creation            go to state 25
-    value_expression           go to state 26
-    assignment_expression      go to state 27
-    expression                 go to state 163
-    statement                  go to state 29
+	.  reduce 59
 
 
 state 163
+	function_declarator : FUNCTION ID LPAREN type_fields RPAREN COLON ID EQ statement .  (63)
 
-   50 expression: expression . SEMICOLON statement
-   51           | expression . SEMICOLON assignment_expression
-   69 function_declaration: FUNCTION ID LPAREN type_list RPAREN COLON ID EQ expression .
+	.  reduce 63
 
-    SEMICOLON  shift, and go to state 65
 
-    $default  reduce using rule 69 (function_declaration)
+State 1 contains 1 shift/reduce conflict.
+State 34 contains 1 shift/reduce conflict.
+State 37 contains 1 shift/reduce conflict.
+State 110 contains 1 shift/reduce conflict.
+
+
+46 terminals, 34 nonterminals
+81 grammar rules, 164 states

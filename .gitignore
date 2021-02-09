@@ -5,3 +5,4 @@ lex.yy.c
 lextest
 _*/
 .vscode/
+rpcalc

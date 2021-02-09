@@ -26,10 +26,10 @@ util.o: util.c util.h
 	cc -g -c util.c
 
 clean: 
-	rm -f a.out util.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o
+	rm -f a.out util.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o y.output
 
 test:
-	@for num in {1..49}; do \
+	@for num in {1..48}; do \
 		fname="../testcases/test$$num.tig"; \
 		echo "syntax analyze $$fname ... \c"; \
 		./a.out $$fname > test.log 2>&1; \

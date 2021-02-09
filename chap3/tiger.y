@@ -11,6 +11,7 @@ void yyerror(char *s)
 }
 %}
 
+
 %union {
 	int pos;
 	int ival;
@@ -20,19 +21,19 @@ void yyerror(char *s)
 %token <sval> ID STRING
 %token <ival> INT
 
-%token 
-  COMMA COLON SEMICOLON LPAREN RPAREN LBRACK RBRACK 
-  LBRACE RBRACE DOT 
+%token
+  COMMA COLON SEMICOLON LPAREN RPAREN LBRACK RBRACK
+  LBRACE RBRACE DOT
   PLUS MINUS TIMES DIVIDE EQ NEQ LT LE GT GE
   AND OR ASSIGN
-  ARRAY IF THEN ELSE WHILE FOR TO DO LET IN END OF 
+  ARRAY IF THEN ELSE WHILE FOR TO DO LET IN END OF
   BREAK NIL
-  FUNCTION VAR TYPE 
+  FUNCTION VAR TYPE
 
 %left OR
 %left AND
-%nonassoc LT GT LE GE
 %nonassoc EQ NEQ
+%nonassoc LT GT LE GE
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left UMINUS
@@ -41,36 +42,41 @@ void yyerror(char *s)
 
 %%
 
-program:
-  /* empty */
-| statement
-;
+program: statement;
 
-/* ==================== expression ==================== */
+/* expression */
+
 primary_expression:
-  ID
-| NIL
+  NIL
 | INT
 | STRING
-| LPAREN RPAREN
 | LPAREN expression RPAREN
+| ID LBRACE type_fields_initializer RBRACE
 ;
 
-array_expression:
-  ID LBRACK expression RBRACK;
+type_fields_initializer:
+  /* %empty */
+| type_fields_initializer_list
+;
+
+type_fields_initializer_list:
+  ID EQ expression
+| type_fields_initializer_list COMMA ID EQ expression
+;
 
 postfix_expression:
   primary_expression
-| array_expression
-| postfix_expression DOT ID
+| ID
+| ID LBRACK expression RBRACK
 | postfix_expression LBRACK expression RBRACK
 | postfix_expression LPAREN RPAREN
-| postfix_expression LPAREN argument_list RPAREN
+| postfix_expression LPAREN argument_expression_list RPAREN
+| postfix_expression DOT ID
 ;
 
-argument_list:
-  expression
-| argument_list COMMA expression
+argument_expression_list:
+  statement
+| argument_expression_list COMMA statement
 ;
 
 unary_expression:
@@ -90,106 +96,122 @@ additive_expression:
 | additive_expression MINUS multiplicative_expression
 ;
 
-equality_expression:
-  additive_expression
-| equality_expression EQ additive_expression
-| equality_expression NEQ additive_expression
-;
-
 relational_expression:
-  equality_expression
-| relational_expression LT equality_expression
-| relational_expression GT equality_expression
-| relational_expression LE equality_expression
-| relational_expression GE equality_expression
+  additive_expression
+| relational_expression LT additive_expression
+| relational_expression GT additive_expression
+| relational_expression LE additive_expression
+| relational_expression GE additive_expression
 ;
 
-AND_expression:
+equality_expression:
   relational_expression
-| AND_expression AND relational_expression
+| equality_expression EQ relational_expression
+| equality_expression NEQ relational_expression
 ;
 
-inclusive_OR_expression:
-  AND_expression
-| inclusive_OR_expression OR AND_expression
+logical_and_expression:
+  equality_expression
+| logical_and_expression AND equality_expression
 ;
 
-array_creation: array_expression OF value_expression;
-
-struct_creation: 
-  ID LBRACE RBRACE
-| ID LBRACE field_list RBRACE
+logical_or_expression:
+  logical_and_expression
+| logical_or_expression OR logical_and_expression
 ;
 
-field_list:
-  ID EQ expression
-| field_list COMMA ID EQ expression
-;
-
-value_expression:
-  inclusive_OR_expression
-| array_creation
-| struct_creation
-;
-
-assignment_expression: 
-  value_expression
-| unary_expression ASSIGN value_expression
+assignment_expression:
+  logical_or_expression
+| unary_expression ASSIGN assignment_expression
 ;
 
 expression:
-  statement
-| assignment_expression
-| expression SEMICOLON statement
-| expression SEMICOLON assignment_expression
+  assignment_expression
+| ID LBRACK expression RBRACK OF expression
+| compound_statement
 ;
 
-/* ==================== declaration ==================== */
+/* declaration */
+
 declaration:
-  type_declaration
-| var_declaration
-| function_declaration
+  /* %empty */
+| init_declarator_list
 ;
 
-declaration_list:
-  declaration
-| declaration_list declaration
+init_declarator_list:
+  init_declarator
+| init_declarator_list init_declarator
 ;
 
-type_declaration: TYPE ID EQ type_definition;
+init_declarator:
+  type_declarator
+| var_declarator
+| function_declarator
+;
+
+type_declarator:
+  TYPE ID EQ type_definition;
 
 type_definition:
   ID
-| LBRACE RBRACE
-| LBRACE type_list RBRACE
+| LBRACE type_fields RBRACE
 | ARRAY OF ID
 ;
 
-type_list:
-  ID COLON ID
-| type_list COMMA ID COLON ID
+type_fields:
+  /* %empty */
+| init_type_fields_list
 ;
 
-var_declaration:
+init_type_fields_list:
+  ID COLON ID
+| init_type_fields_list COMMA ID COLON ID
+;
+
+var_declarator:
   VAR ID ASSIGN expression
 | VAR ID COLON ID ASSIGN expression
 ;
 
-function_declaration:
-  FUNCTION ID LPAREN RPAREN EQ expression
-| FUNCTION ID LPAREN RPAREN COLON ID EQ expression
-| FUNCTION ID LPAREN type_list RPAREN EQ expression
-| FUNCTION ID LPAREN type_list RPAREN COLON ID EQ expression
-
-/* ==================== statement ==================== */
-statement:
-  BREAK
-| IF expression THEN expression
-| IF expression THEN expression ELSE expression
-| WHILE expression DO expression
-| FOR ID ASSIGN expression TO expression DO expression
-| LET declaration_list IN expression END
-| LET declaration_list IN END
+function_declarator:
+  FUNCTION ID LPAREN type_fields RPAREN EQ statement
+| FUNCTION ID LPAREN type_fields RPAREN COLON ID EQ statement 
 ;
 
-%%
+/* statement */
+
+statement:
+  expression_statement
+| selection_statement
+| iteration_statement
+| jump_statement
+| let_statement
+;
+
+compound_statement: LPAREN init_statement_list RPAREN;
+
+init_statement_list:
+  /* %empty */
+| statement_list
+;
+
+statement_list:
+  statement
+| statement_list SEMICOLON statement
+;
+
+expression_statement: expression;
+
+selection_statement:
+  IF expression THEN statement
+| IF expression THEN statement ELSE statement
+;
+
+iteration_statement:
+  WHILE expression DO statement
+| FOR ID ASSIGN expression TO expression DO statement
+;
+
+jump_statement: BREAK;
+
+let_statement: LET declaration IN statement_list END;
