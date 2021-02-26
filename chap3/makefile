@@ -17,16 +17,16 @@ errormsg.o: errormsg.c errormsg.h util.h
 	cc -g -c errormsg.c
 
 lex.yy.o: lex.yy.c y.tab.h errormsg.h util.h
-	cc -g -c lex.yy.c
+	cc -g -c lex.yy.c -I../chap2
 
-#lex.yy.c: tiger.lex
-#	lex tiger.lex
+lex.yy.c: ../chap2/tiger.l
+	flex ../chap2/tiger.l
 
 util.o: util.c util.h
 	cc -g -c util.c
 
 clean: 
-	rm -f a.out util.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o y.output
+	rm -f a.out util.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o y.output *.log
 
 test:
 	@for num in {1..48}; do \

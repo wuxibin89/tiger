@@ -7,6 +7,9 @@
 
 /* Type Definitions */
 
+#ifndef ABSYN_H_
+#define ABSYN_H_
+
 typedef int A_pos;
 
 typedef struct A_var_ *A_var;
@@ -26,7 +29,7 @@ typedef struct A_efield_ *A_efield;
 typedef struct A_efieldList_ *A_efieldList;
 
 typedef enum {A_plusOp, A_minusOp, A_timesOp, A_divideOp,
-	     A_eqOp, A_neqOp, A_ltOp, A_leOp, A_gtOp, A_geOp} A_oper;
+	     A_eqOp, A_neqOp, A_ltOp, A_leOp, A_gtOp, A_geOp, A_andOp, A_orOp} A_oper;
 
 struct A_var_
        {enum {A_simpleVar, A_fieldVar, A_subscriptVar} kind;
@@ -133,3 +136,5 @@ A_namety A_Namety(S_symbol name, A_ty ty);
 A_nametyList A_NametyList(A_namety head, A_nametyList tail);
 A_efield A_Efield(S_symbol name, A_exp exp);
 A_efieldList A_EfieldList(A_efield head, A_efieldList tail);
+
+#endif // ABSYN_H_

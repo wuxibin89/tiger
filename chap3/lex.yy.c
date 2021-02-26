@@ -8,7 +8,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 35
+#define YY_FLEX_SUBMINOR_VERSION 37
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -46,7 +46,6 @@ typedef int16_t flex_int16_t;
 typedef uint16_t flex_uint16_t;
 typedef int32_t flex_int32_t;
 typedef uint32_t flex_uint32_t;
-typedef uint64_t flex_uint64_t;
 #else
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
@@ -54,7 +53,6 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -84,6 +82,8 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
+
+#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -330,7 +330,7 @@ void yyfree (void *  );
 
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
-#define yywrap(n) 1
+#define yywrap() 1
 #define YY_SKIP_YYWRAP
 
 typedef unsigned char YY_CHAR;
@@ -356,7 +356,7 @@ static void yy_fatal_error (yyconst char msg[]  );
  */
 #define YY_DO_BEFORE_ACTION \
 	(yytext_ptr) = yy_bp; \
-	yyleng = (yy_size_t) (yy_cp - yy_bp); \
+	yyleng = (size_t) (yy_cp - yy_bp); \
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
@@ -532,12 +532,12 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "tiger.l"
-#line 2 "tiger.l"
+#line 1 "../chap2/tiger.l"
+#line 2 "../chap2/tiger.l"
 #include <string.h>
 #include "util.h"
+#include "tokens.h"
 #include "errormsg.h"
-#include "y.tab.h"
 
 /* max lenght of string literal */
 #define MAX_STR_CONST 2048
@@ -645,7 +645,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO fwrite( yytext, yyleng, 1, yyout )
+#define ECHO do { if (fwrite( yytext, yyleng, 1, yyout )) {} } while (0)
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -656,7 +656,7 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		yy_size_t n; \
+		size_t n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -738,7 +738,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 26 "tiger.l"
+#line 26 "../chap2/tiger.l"
 
  /* reserved words */
 #line 745 "lex.yy.c"
@@ -826,258 +826,258 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 28 "tiger.l"
+#line 28 "../chap2/tiger.l"
 {adjust(); return TYPE;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 29 "tiger.l"
+#line 29 "../chap2/tiger.l"
 {adjust(); return VAR;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 30 "tiger.l"
+#line 30 "../chap2/tiger.l"
 {adjust(); return FUNCTION;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 31 "tiger.l"
+#line 31 "../chap2/tiger.l"
 {adjust(); return ARRAY;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 32 "tiger.l"
+#line 32 "../chap2/tiger.l"
 {adjust(); return OF;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 33 "tiger.l"
+#line 33 "../chap2/tiger.l"
 {adjust(); return NIL;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 34 "tiger.l"
+#line 34 "../chap2/tiger.l"
 {adjust(); return IF;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 35 "tiger.l"
+#line 35 "../chap2/tiger.l"
 {adjust(); return THEN;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 36 "tiger.l"
+#line 36 "../chap2/tiger.l"
 {adjust(); return ELSE;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 37 "tiger.l"
+#line 37 "../chap2/tiger.l"
 {adjust(); return FOR;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 38 "tiger.l"
+#line 38 "../chap2/tiger.l"
 {adjust(); return TO;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 39 "tiger.l"
+#line 39 "../chap2/tiger.l"
 {adjust(); return WHILE;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 40 "tiger.l"
+#line 40 "../chap2/tiger.l"
 {adjust(); return DO;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 41 "tiger.l"
+#line 41 "../chap2/tiger.l"
 {adjust(); return BREAK;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 42 "tiger.l"
+#line 42 "../chap2/tiger.l"
 {adjust(); return LET;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 43 "tiger.l"
+#line 43 "../chap2/tiger.l"
 {adjust(); return IN;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 44 "tiger.l"
+#line 44 "../chap2/tiger.l"
 {adjust(); return END;}
 	YY_BREAK
 /* operators */
 case 18:
 YY_RULE_SETUP
-#line 47 "tiger.l"
+#line 47 "../chap2/tiger.l"
 {adjust(); return COMMA;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 48 "tiger.l"
+#line 48 "../chap2/tiger.l"
 {adjust(); return COLON;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 49 "tiger.l"
+#line 49 "../chap2/tiger.l"
 {adjust(); return SEMICOLON;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 50 "tiger.l"
+#line 50 "../chap2/tiger.l"
 {adjust(); return LPAREN;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 51 "tiger.l"
+#line 51 "../chap2/tiger.l"
 {adjust(); return RPAREN;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 52 "tiger.l"
+#line 52 "../chap2/tiger.l"
 {adjust(); return LBRACK;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 53 "tiger.l"
+#line 53 "../chap2/tiger.l"
 {adjust(); return RBRACK;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 54 "tiger.l"
+#line 54 "../chap2/tiger.l"
 {adjust(); return LBRACE;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 55 "tiger.l"
+#line 55 "../chap2/tiger.l"
 {adjust(); return RBRACE;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 56 "tiger.l"
+#line 56 "../chap2/tiger.l"
 {adjust(); return DOT;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 57 "tiger.l"
+#line 57 "../chap2/tiger.l"
 {adjust(); return PLUS;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 58 "tiger.l"
+#line 58 "../chap2/tiger.l"
 {adjust(); return MINUS;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 59 "tiger.l"
+#line 59 "../chap2/tiger.l"
 {adjust(); return TIMES;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 60 "tiger.l"
+#line 60 "../chap2/tiger.l"
 {adjust(); return DIVIDE;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 61 "tiger.l"
+#line 61 "../chap2/tiger.l"
 {adjust(); return EQ;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 62 "tiger.l"
+#line 62 "../chap2/tiger.l"
 {adjust(); return NEQ;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 63 "tiger.l"
+#line 63 "../chap2/tiger.l"
 {adjust(); return LT;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 64 "tiger.l"
+#line 64 "../chap2/tiger.l"
 {adjust(); return LE;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 65 "tiger.l"
+#line 65 "../chap2/tiger.l"
 {adjust(); return GT;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 66 "tiger.l"
+#line 66 "../chap2/tiger.l"
 {adjust(); return GE;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 67 "tiger.l"
+#line 67 "../chap2/tiger.l"
 {adjust(); return AND;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 68 "tiger.l"
+#line 68 "../chap2/tiger.l"
 {adjust(); return OR;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 69 "tiger.l"
+#line 69 "../chap2/tiger.l"
 {adjust(); return ASSIGN;}
 	YY_BREAK
 /* whitespace */
 case 41:
 YY_RULE_SETUP
-#line 72 "tiger.l"
+#line 72 "../chap2/tiger.l"
 {adjust();}
 	YY_BREAK
 case 42:
 /* rule 42 can match eol */
 YY_RULE_SETUP
-#line 73 "tiger.l"
+#line 73 "../chap2/tiger.l"
 {adjust(); EM_newline();}
 	YY_BREAK
 /* comment */
 case 43:
 YY_RULE_SETUP
-#line 76 "tiger.l"
+#line 76 "../chap2/tiger.l"
 {adjust(); BEGIN(comment);}
 	YY_BREAK
 
 case 44:
 /* rule 44 can match eol */
 YY_RULE_SETUP
-#line 78 "tiger.l"
+#line 78 "../chap2/tiger.l"
 {adjust();} /* eat anything that's not a '*' */
 	YY_BREAK
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 79 "tiger.l"
+#line 79 "../chap2/tiger.l"
 {adjust();} /* eat up '*'s not followed by '/'s */
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 80 "tiger.l"
+#line 80 "../chap2/tiger.l"
 {adjust(); BEGIN(INITIAL);}
 	YY_BREAK
 
 /* integeral literal */
 case 47:
 YY_RULE_SETUP
-#line 84 "tiger.l"
+#line 84 "../chap2/tiger.l"
 {adjust(); yylval.ival = atoi(yytext); return INT;}
 	YY_BREAK
 /* string literal */
 case 48:
 YY_RULE_SETUP
-#line 87 "tiger.l"
+#line 87 "../chap2/tiger.l"
 {adjust(); string_buf_ptr = string_buf; BEGIN(string);}
 	YY_BREAK
 
 case 49:
 YY_RULE_SETUP
-#line 89 "tiger.l"
+#line 89 "../chap2/tiger.l"
 {
     adjust(); 
     *string_buf_ptr = '\0'; yylval.sval = String(string_buf);
@@ -1087,12 +1087,12 @@ YY_RULE_SETUP
 case 50:
 /* rule 50 can match eol */
 YY_RULE_SETUP
-#line 95 "tiger.l"
+#line 95 "../chap2/tiger.l"
 {adjust(); EM_error(EM_tokPos, "unterminated string literal");}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 97 "tiger.l"
+#line 97 "../chap2/tiger.l"
 {
     adjust();
     int result; 
@@ -1105,43 +1105,43 @@ YY_RULE_SETUP
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 107 "tiger.l"
+#line 107 "../chap2/tiger.l"
 {adjust(); EM_error(EM_tokPos, "bad escape");}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 109 "tiger.l"
+#line 109 "../chap2/tiger.l"
 {adjust(); *string_buf_ptr++ = '\n';}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 110 "tiger.l"
+#line 110 "../chap2/tiger.l"
 {adjust(); *string_buf_ptr++ = '\t';}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 111 "tiger.l"
+#line 111 "../chap2/tiger.l"
 {adjust(); *string_buf_ptr++ = '\r';}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 112 "tiger.l"
+#line 112 "../chap2/tiger.l"
 {adjust(); *string_buf_ptr++ = '\b';}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 113 "tiger.l"
+#line 113 "../chap2/tiger.l"
 {adjust(); *string_buf_ptr++ = '\f';}
 	YY_BREAK
 case 58:
 /* rule 58 can match eol */
 YY_RULE_SETUP
-#line 114 "tiger.l"
+#line 114 "../chap2/tiger.l"
 {adjust(); *string_buf_ptr++ = yytext[1];}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 116 "tiger.l"
+#line 116 "../chap2/tiger.l"
 {
     adjust();
     memcpy(string_buf_ptr, yytext, yyleng);
@@ -1152,17 +1152,17 @@ YY_RULE_SETUP
 /* identifier */
 case 60:
 YY_RULE_SETUP
-#line 124 "tiger.l"
+#line 124 "../chap2/tiger.l"
 {adjust(); yylval.sval = NString(yytext, yyleng); return ID; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 126 "tiger.l"
+#line 126 "../chap2/tiger.l"
 {adjust(); EM_error(EM_tokPos,"illegal token");}
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 127 "tiger.l"
+#line 127 "../chap2/tiger.l"
 ECHO;
 	YY_BREAK
 #line 1169 "lex.yy.c"
@@ -1360,7 +1360,7 @@ static int yy_get_next_buffer (void)
 			{ /* Not enough room in the buffer - grow it. */
 
 			/* just a shorter name for the current buffer */
-			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
+			YY_BUFFER_STATE b = YY_CURRENT_BUFFER_LVALUE;
 
 			int yy_c_buf_p_offset =
 				(int) ((yy_c_buf_p) - b->yy_ch_buf);
@@ -1493,7 +1493,7 @@ static int yy_get_next_buffer (void)
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 	yy_is_jam = (yy_current_state == 117);
 
-	return yy_is_jam ? 0 : yy_current_state;
+		return yy_is_jam ? 0 : yy_current_state;
 }
 
     static void yyunput (int c, register char * yy_bp )
@@ -1581,7 +1581,7 @@ static int yy_get_next_buffer (void)
 				case EOB_ACT_END_OF_FILE:
 					{
 					if ( yywrap( ) )
-						return 0;
+						return EOF;
 
 					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
@@ -1717,10 +1717,6 @@ static void yy_load_buffer_state  (void)
 	yyfree((void *) b  );
 }
 
-#ifndef __cplusplus
-extern int isatty (int );
-#endif /* __cplusplus */
-    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a yyrestart() or at EOF.
@@ -1925,8 +1921,8 @@ YY_BUFFER_STATE yy_scan_string (yyconst char * yystr )
 
 /** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
- * @param bytes the byte buffer to scan
- * @param len the number of bytes in the buffer pointed to by @a bytes.
+ * @param yybytes the byte buffer to scan
+ * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
@@ -1934,7 +1930,8 @@ YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len 
 {
 	YY_BUFFER_STATE b;
 	char *buf;
-	yy_size_t n, i;
+	yy_size_t n;
+	yy_size_t i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
@@ -2164,4 +2161,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 127 "tiger.l"
+#line 127 "../chap2/tiger.l"
