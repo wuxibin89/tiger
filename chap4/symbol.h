@@ -2,10 +2,20 @@
  * symbol.h - Symbols and symbol-tables
  *
  */
+#ifndef SYMBOL_H_
+#define SYMBOL_H_
+
+#include "table.h"
+#include "util.h"
 
 typedef struct S_symbol_ *S_symbol;
 
-/* Make a unique symbol from a given string.  
+struct S_symbol_ {
+  string name;
+  S_symbol next;
+};
+
+/* Make a unique symbol from a given string.
  *  Different calls to S_Symbol("foo") will yield the same S_symbol
  *  value, even if the "foo" strings are at different locations. */
 S_symbol S_Symbol(string);
@@ -35,3 +45,4 @@ void S_beginScope(S_table t);
    and end the current scope. */
 void S_endScope(S_table t);
 
+#endif  // SYMBOL_H_

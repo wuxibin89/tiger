@@ -71,6 +71,8 @@ void yyerror(char *s)
 %nonassoc ID
 %nonassoc LBRACK
 %nonassoc ASSIGN
+%nonassoc THEN
+%nonassoc ELSE
 %left OR
 %left AND
 %nonassoc EQ NEQ
@@ -80,8 +82,6 @@ void yyerror(char *s)
 %left UMINUS
 %nonassoc DO
 %nonassoc OF
-%nonassoc THEN
-%nonassoc ELSE
 
 %start program
 
