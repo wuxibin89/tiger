@@ -1,22 +1,37 @@
 /*
- * temp.h 
+ * temp.h
  *
  */
 
+#ifndef TEMP_H_
+#define TEMP_H_
+
+#include <stdio.h>
+
+#include "symbol.h"
+
+// temp: 暂时保持在寄存器中的值，局部变量的抽象名
 typedef struct Temp_temp_ *Temp_temp;
 Temp_temp Temp_newtemp(void);
 
 typedef struct Temp_tempList_ *Temp_tempList;
-struct Temp_tempList_ { Temp_temp head; Temp_tempList tail;};
+struct Temp_tempList_ {
+  Temp_temp head;
+  Temp_tempList tail;
+};
 Temp_tempList Temp_TempList(Temp_temp h, Temp_tempList t);
 
+// label: 准确地址待确定的某种机器语言的位置，静态存储器地址的抽象名
 typedef S_symbol Temp_label;
 Temp_label Temp_newlabel(void);
 Temp_label Temp_namedlabel(string name);
 string Temp_labelstring(Temp_label s);
 
 typedef struct Temp_labelList_ *Temp_labelList;
-struct Temp_labelList_ { Temp_label head; Temp_labelList tail;};
+struct Temp_labelList_ {
+  Temp_label head;
+  Temp_labelList tail;
+};
 Temp_labelList Temp_LabelList(Temp_label h, Temp_labelList t);
 
 typedef struct Temp_map_ *Temp_map;
@@ -28,3 +43,4 @@ void Temp_dumpMap(FILE *out, Temp_map m);
 
 Temp_map Temp_name(void);
 
+#endif  // TEMP_H_

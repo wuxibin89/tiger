@@ -31,8 +31,11 @@ void builtin(S_table venv, S_table tenv) {
 
   assert(yyparse() == 0);
   assert(absyn_root->kind == A_letExp);
+
+  Tr_level level = Tr_outermost();
+
   A_decList l = absyn_root->u.let.decs;
   for (; l; l = l->tail) {
-    transDec(venv, tenv, l->head);
+    transDec(level, venv, tenv, l->head);
   }
 }
