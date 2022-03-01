@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
   }
 
   A_exp exp = parse(argv[1]);
-  SEM_transProg(exp);
+  F_fragList fragList = SEM_transProg(exp);
 
   return 0;
 }

@@ -36,6 +36,6 @@ void builtin(S_table venv, S_table tenv) {
 
   A_decList l = absyn_root->u.let.decs;
   for (; l; l = l->tail) {
-    transDec(level, venv, tenv, l->head);
+    transDec(level, NULL, venv, tenv, l->head);
   }
 }

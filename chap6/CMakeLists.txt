@@ -4,5 +4,5 @@ add_library(
 	temp.c
 	translate.c
 )
-target_link_libraries(frame parser)
+target_link_libraries(frame parser tree)
 target_include_directories(frame PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

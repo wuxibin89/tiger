@@ -62,7 +62,7 @@ void yyerror(char *s)
 %type <var> lvalue
 %type <efieldList> efields efield_list
 %type <efield> efield
-%type <exp> exp program call_exp op_exp record_exp array_exp if_exp while_exp for_exp let_exp 
+%type <exp> exp program call_exp arith_exp cmp_exp bool_exp record_exp array_exp if_exp while_exp for_exp let_exp 
 %type <expList> expseq expseq_list args arg_list
 /* et cetera */
 
@@ -161,7 +161,9 @@ exp:
 | MINUS exp  %prec UMINUS             { $$ = A_OpExp(EM_tokPos, A_minusOp, A_IntExp(EM_tokPos, 0), $2); }
 | BREAK                               { $$ = A_BreakExp(EM_tokPos); }
 | call_exp                            { $$ = $1; }
-| op_exp                              { $$ = $1; }
+| arith_exp                           { $$ = $1; }
+| cmp_exp                             { $$ = $1; }
+| bool_exp                            { $$ = $1; }
 | record_exp                          { $$ = $1; }
 | array_exp                           { $$ = $1; }
 | if_exp                              { $$ = $1; }
@@ -192,19 +194,25 @@ arg_list:
 | arg_list COMMA exp                  { $$ = A_ExpList($3, $1); }
 ;
 
-op_exp: 
+arith_exp:
   exp PLUS exp      { $$ = A_OpExp(EM_tokPos, A_plusOp, $1, $3); }
 | exp MINUS exp     { $$ = A_OpExp(EM_tokPos, A_minusOp, $1, $3); }
 | exp TIMES exp     { $$ = A_OpExp(EM_tokPos, A_timesOp, $1, $3); }
 | exp DIVIDE exp    { $$ = A_OpExp(EM_tokPos, A_divideOp, $1, $3); }
-| exp LT exp        { $$ = A_OpExp(EM_tokPos, A_ltOp, $1, $3); }
+;
+
+cmp_exp:
+  exp LT exp        { $$ = A_OpExp(EM_tokPos, A_ltOp, $1, $3); }
 | exp GT exp        { $$ = A_OpExp(EM_tokPos, A_gtOp, $1, $3); }
 | exp LE exp        { $$ = A_OpExp(EM_tokPos, A_leOp, $1, $3); }
 | exp GE exp        { $$ = A_OpExp(EM_tokPos, A_geOp, $1, $3); }
 | exp EQ exp        { $$ = A_OpExp(EM_tokPos, A_eqOp, $1, $3); }
 | exp NEQ exp       { $$ = A_OpExp(EM_tokPos, A_neqOp, $1, $3); }
-| exp AND exp       { $$ = A_OpExp(EM_tokPos, A_andOp, $1, $3); }
-| exp OR exp        { $$ = A_OpExp(EM_tokPos, A_orOp, $1, $3); }
+;
+
+bool_exp:
+  exp AND exp       { $$ = A_IfExp(EM_tokPos, $1, $3, A_IntExp(EM_tokPos, 0)); }
+| exp OR exp        { $$ = A_IfExp(EM_tokPos, $1, A_IntExp(EM_tokPos, 1), $3); }
 ;
 
 record_exp: ID LBRACE efields RBRACE    { $$ = A_RecordExp(EM_tokPos, S_Symbol($1), $3); }
